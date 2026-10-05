@@ -3,6 +3,9 @@
 /*
 !/.gitignore
 !/.gitattributes
+!/.github/
+/.github/*
+!/.github/CODEOWNERS
 !/LICENSE
 !/README.md
 !/README.txt

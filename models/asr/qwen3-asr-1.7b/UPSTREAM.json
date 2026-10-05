@@ -1,0 +1,57 @@
+{
+  "model": "Qwen/Qwen3-ASR-1.7B-hf",
+  "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+  "license": "Apache-2.0",
+  "verified_on": "2026-10-05",
+  "redistribution": "Unmodified model configuration, tokenizer and documentation only; no weights.",
+  "files": [
+    {
+      "path": "config.json",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/config.json",
+      "sha256": "117ac8e63e2af7cae3665e5a632d6eb03f5f384915519ceb6403c15ec6533f63",
+      "bytes": 2399
+    },
+    {
+      "path": "generation_config.json",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/generation_config.json",
+      "sha256": "9939fc9388b79bd70757f938b87381e817173d6a6158f5af6506c0b73e775c3c",
+      "bytes": 165
+    },
+    {
+      "path": "processor_config.json",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/processor_config.json",
+      "sha256": "bc0b230081b44e629dd5b9045b78495615c1831b4b9f4cffe97bd37e82a6156a",
+      "bytes": 487
+    },
+    {
+      "path": "tokenizer.json",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/tokenizer.json",
+      "sha256": "fe1fad59be22a41ee293363fcf95fdedbc7c93f3b49270b1d2e18bd1399a7a05",
+      "bytes": 11429653
+    },
+    {
+      "path": "tokenizer_config.json",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/tokenizer_config.json",
+      "sha256": "945e980986de2ca7768f3326bfdbb4fbea3406f972b8ae0be233089f2b253c11",
+      "bytes": 998
+    },
+    {
+      "path": "chat_template.jinja",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/chat_template.jinja",
+      "sha256": "f50e6b694fbf4a683206e37869990d68333fe95d285730f084c838a34b0d98c2",
+      "bytes": 1434
+    },
+    {
+      "path": "README.md",
+      "url": "https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/resolve/bcd2b5b7f32b480ab5790554cfa8347f246a14f3/README.md",
+      "sha256": "427b9a6a4a32477e9df8790ef92f5cbcde790ee148ee5dd8c36f77d9556998a2",
+      "bytes": 16538
+    },
+    {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/QwenLM/Qwen3-ASR/7c6daf77a2421100f5fb066495372c00129d39ff/LICENSE",
+      "sha256": "a44a6081c73ad75f0255bb2bb5cab74ef1829565a895a24e53a4f11290ab7655",
+      "bytes": 11343
+    }
+  ]
+}

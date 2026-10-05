@@ -1,0 +1,636 @@
+LiveSubtitle - Third-party components / 제3자 구성요소 고지
+확인일: 2026-10-05 (대한민국 표준시)
+
+LiveSubtitle의 직접 작성한 코드와 문서:
+Copyright (c) 2026 digital-101 — MIT License (루트 LICENSE)
+
+이 문서는 포함된 외부 소스 및 별도로 설치하는 실행 환경·모델의 출처를 기록합니다.
+외부 구성요소의 저작권과 라이선스는 각 권리자에게 있으며 프로젝트 MIT로 대체되지
+않습니다. 아래 상대 경로는 LiveSubtitle 폴더 기준입니다.
+
+소스 공개에는 engine/_vendor의 코드·필수 자산·원문 고지를 포함합니다.
+models/에서는 Qwen3-ASR-1.7B와 Whisper large-v3-turbo의 지정한 설정·토크나이저와
+원문 고지, 다운로드 안내만 포함합니다. 각 폴더의 UPSTREAM 고지에 출처를 기록합니다.
+모델 가중치, runtime/ 및 빌드된 실행 파일은 소스 저장소에서 제외합니다.
+아래 런타임·가중치 경로는 해당 구성요소를 설치한 실행 환경에서만 존재합니다.
+소스 공개 범위와 빌드 방법은 SOURCE_RELEASE.txt를 참고하세요.
+
+0. 소스에 포함한 WhisperLiveKit / Whisper / AlignAtt 관련 코드
+------------------------------------------------------------
+위치: engine/_vendor/whisperlivekit/
+출처: https://github.com/QuentinFuxa/WhisperLiveKit
+고정 리비전: 363e4f6d029694d9c81ae548beddd9d3c88a3637
+기본 라이선스: Apache License 2.0
+저작권: Copyright 2025 Quentin Fuxa
+보존 원문: engine/_vendor/whisperlivekit/LICENSE-WhisperLiveKit.txt
+내장 OpenAI Whisper 코드 및 tokenizer/mel-filter 자산: MIT
+보존 원문: engine/_vendor/whisperlivekit/LICENSE-OpenAI-Whisper.txt
+
+관련 선행 구현의 원문도 함께 보존합니다.
+  SimulStreaming (Charles University): MIT
+    engine/_vendor/whisperlivekit/LICENSE-SimulStreaming.txt
+    https://github.com/ufal/SimulStreaming
+  SimulWhisper (Speech and Audio Technology LAB of Tsinghua University): Apache-2.0
+    engine/_vendor/whisperlivekit/LICENSE-SimulWhisper.txt
+    https://github.com/backspacetg/simul_whisper
+  MOSST의 resize 유틸리티 (Facebook, Inc. and its affiliates.): MIT
+    engine/_vendor/whisperlivekit/LICENSE-MOSST.txt
+    https://github.com/dqqcasia/mosst
+
+가져온 파일·자산, 리비전, 해시, 수정 내역은 같은 폴더의 UPSTREAM.json에 기록합니다.
+수정한 외부 Python 파일에는 변경 사실을 표시하며 기존 저작권 고지는 유지합니다.
+이 출처 표기는 해당 프로젝트가 LiveSubtitle을 보증하거나 제휴한다는 뜻이 아닙니다.
+
+0a. Silero VAD
+------------------------------------------------------------
+faster-whisper에 포함된 silero_vad_v6.onnx를 열린 음성 구간의 종료 판단에 사용합니다.
+출처: https://github.com/snakers4/silero-vad
+라이선스: MIT
+저작권: Copyright (c) 2020-present Silero Team
+원문 보존: engine/_vendor/whisperlivekit/LICENSE-Silero-VAD.txt
+설치된 자산: runtime/python/Lib/site-packages/faster_whisper/assets/silero_vad_v6.onnx
+소스 저장소는 runtime/의 이 모델 자산을 포함하지 않습니다.
+
+1. 음성 인식 모델: Qwen3-ASR-1.7B-hf
+------------------------------------------------------------
+원본/배포: Qwen/Qwen3-ASR-1.7B-hf
+공식 모델: https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf
+고정 배포 리비전: bcd2b5b7f32b480ab5790554cfa8347f246a14f3
+위치: models/asr/qwen3-asr-1.7b/
+라이선스: Apache License 2.0 (공식 모델 카드)
+Apache License 2.0 원문: https://www.apache.org/licenses/LICENSE-2.0
+이 앱은 Hugging Face/PyTorch 경로로 로컬 추론합니다.
+모델 가중치뿐 아니라 내려받은 설정·토크나이저에도 각 배포처의 조건을 적용합니다.
+
+1a. 추가 번역 모델: TranslateGemma 12B / bullerwins Q4_K_M GGUF
+------------------------------------------------------------
+원본 모델: google/translategemma-12b-it
+GGUF 제작/배포: bullerwins/translategemma-12b-it-GGUF
+포맷/양자화: GGUF, Q4_K_M
+파일: models/translation/translategemma-12b-it-Q4_K_M.gguf
+배포 리비전: d7d1d8cc4ff53d4bc883ef33eae3894f07833b63
+크기: 7300793664 bytes
+SHA-256: 9196d728812afbf5efc10b539298585725edc3a4ecc092c22fdde5bbaf41879e
+원본: https://huggingface.co/google/translategemma-12b-it
+배포처: https://huggingface.co/bullerwins/translategemma-12b-it-GGUF
+고정 배포 리비전:
+https://huggingface.co/bullerwins/translategemma-12b-it-GGUF/tree/d7d1d8cc4ff53d4bc883ef33eae3894f07833b63
+적용 약관: Gemma Terms of Use
+원문: https://ai.google.dev/gemma/terms
+Gemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms
+이 모델에는 Qwen 항목의 Apache License 2.0이 대신 적용되지 않습니다.
+앱은 전용 source_lang → ko 프롬프트로 현재 원문을 번역하며 이전 문맥을 보내지 않습니다.
+
+1b. 추가 번역 모델: Hy-MT2 7B / Tencent 공식 Q6_K GGUF
+------------------------------------------------------------
+원본 모델: tencent/Hy-MT2-7B
+GGUF 제작/배포: tencent/Hy-MT2-7B-GGUF
+포맷/양자화: GGUF, Q6_K
+파일: models/translation/HY-MT2-7B-Q6_K.gguf
+배포 리비전: ab8472660ac61fac25f1af43fac2599d52a8a775
+크기: 6164482720 bytes
+SHA-256: 88ef0aba59952a4cfe4be36cb5baf797dbb370bc60e9dcbd7297036021e52831
+라이선스: Apache License 2.0 (공식 모델 카드 표기)
+원본: https://huggingface.co/tencent/Hy-MT2-7B
+배포처: https://huggingface.co/tencent/Hy-MT2-7B-GGUF
+고정 배포 리비전:
+https://huggingface.co/tencent/Hy-MT2-7B-GGUF/tree/ab8472660ac61fac25f1af43fac2599d52a8a775
+Apache License 2.0 원문: https://www.apache.org/licenses/LICENSE-2.0
+이 배포 파일의 EOS ID 3은 앱 실행 시 메모리에서 127960으로 보정합니다.
+모델 파일의 바이트는 변경하지 않으며 위 SHA-256은 원본 배포 파일에 해당합니다.
+
+1c. MiLMMT-46-12B-v1.0 — i1-Q4_K_M GGUF
+  원본 모델/개발팀: Xiaomi Inc., https://huggingface.co/xiaomi-research/MiLMMT-46-12B-v1.0
+  GGUF 양자화 배포: https://huggingface.co/mradermacher/MiLMMT-46-12B-v1.0-i1-GGUF
+  파일: models/translation/MiLMMT-46-12B-v1.0.i1-Q4_K_M.gguf
+  고정 리비전: 0d63dcbbc3e011bb2728c36769b991cd0109a2dc
+  크기: 7,300,777,696 bytes
+  SHA-256: 9f48c5c820b746b288cc151bf33c99d1b3bbeafc38ef04eceb29494164305133
+  라이선스: Gemma Terms of Use — https://ai.google.dev/gemma/terms
+  기반 모델: google/gemma-3-12b-pt
+  로컬 텍스트 번역만 사용하며 비전 projector는 설치하지 않습니다.
+
+2. 음성 인식 모델: Whisper large-v3-turbo / CTranslate2 변환
+------------------------------------------------------------
+원본 모델: openai/whisper-large-v3-turbo
+변환/배포: dropbox-dash/faster-whisper-large-v3-turbo
+모델 버전: large-v3-turbo, 배포 가중치 float16, CTranslate2 포맷
+폴더: models/asr/whisper-large-v3-turbo/
+배포 리비전: 0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf
+model.bin 크기: 1617884929 bytes
+model.bin SHA-256: e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da
+라이선스: MIT (원본 Whisper 및 변환 모델 카드 표기)
+원본: https://huggingface.co/openai/whisper-large-v3-turbo
+배포처: https://huggingface.co/dropbox-dash/faster-whisper-large-v3-turbo
+원문: https://github.com/openai/whisper/blob/main/LICENSE
+고정 배포 리비전:
+https://huggingface.co/dropbox-dash/faster-whisper-large-v3-turbo/tree/0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf
+나머지 모델 파일의 해시는 models/model-manifest.json에 기록되어 있습니다.
+
+3. llama.cpp / ggml
+------------------------------------------------------------
+버전: b11378, Windows x64 CUDA 12.4 빌드
+배포 파일: llama-b11378-bin-win-cuda-12.4-x64.zip
+함께 받은 CUDA 종속 파일: cudart-llama-bin-win-cuda-12.4-x64.zip
+설치 위치: runtime/llama/
+프로젝트 라이선스: MIT
+저작권: Copyright (c) 2023-2026 The ggml authors
+소스/릴리스: https://github.com/ggml-org/llama.cpp/releases/tag/b11378
+해당 태그 원문: https://raw.githubusercontent.com/ggml-org/llama.cpp/b11378/LICENSE
+포함된 libomp.dll: Apache-2.0 WITH LLVM-exception
+보존 원문: runtime/llama/LICENSE-LLVM-OpenMP
+LLVM 원문: https://github.com/llvm/llvm-project/blob/main/LICENSE.TXT
+cublas64_12.dll, cublasLt64_12.dll, cudart64_12.dll은 NVIDIA 구성요소이며
+llama.cpp의 MIT 라이선스로 다시 허가되는 것이 아닙니다. 아래 NVIDIA 항목을
+참고하십시오. CUDA 12.4 배포 이름은 Python용 CUDA 12.9 패키지와 구분합니다.
+
+4. CPython
+------------------------------------------------------------
+버전: Python 3.12.10, Windows AMD64 embeddable distribution
+배포 파일: python-3.12.10-embed-amd64.zip
+설치 위치: runtime/python/
+라이선스: Python Software Foundation License Version 2 및 포함된 역사적/
+제3자 라이선스. 자세한 원문은 배포물 LICENSE.txt가 기준입니다.
+공식 배포: https://www.python.org/downloads/release/python-31210/
+소스: https://github.com/python/cpython/tree/v3.12.10
+원문: https://github.com/python/cpython/blob/v3.12.10/LICENSE
+보존 원문: runtime/python/LICENSE.txt
+
+5. Microsoft .NET / WPF / Windows Forms
+------------------------------------------------------------
+빌드 대상: net10.0-windows, win-x64, self-contained
+빌드 SDK: 10.0.401 (개발 도구, 앱 실행 시 전체 SDK는 필요하지 않음)
+확인한 SDK 내 런타임: Microsoft.NETCore.App 10.0.12 및
+Microsoft.WindowsDesktop.App 10.0.12
+최종 게시 런타임 버전은 LiveSubtitle.runtimeconfig.json 및
+LiveSubtitle.deps.json의 내용이 우선합니다.
+오픈 소스 프로젝트 라이선스: MIT; 각 프로젝트의 제3자 고지는 별도 적용됩니다.
+소스: https://github.com/dotnet/runtime
+      https://github.com/dotnet/wpf
+      https://github.com/dotnet/winforms
+소스 라이선스:
+https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+https://github.com/dotnet/wpf/blob/main/LICENSE.TXT
+https://github.com/dotnet/winforms/blob/main/LICENSE.TXT
+제3자 고지: https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT
+Microsoft 배포물에 동봉된 약관은 소스 라이선스와 구분하여 확인해야 합니다.
+사용한 SDK의 LICENSE.txt 제목은 MICROSOFT SOFTWARE LICENSE TERMS /
+MICROSOFT .NET LIBRARY이며 ThirdPartyNotices.txt도 함께 제공됩니다.
+공식 배포 약관: https://dotnet.microsoft.com/en-us/dotnet_library_license.htm
+공식 다운로드: https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+
+6. faster-whisper / CTranslate2
+------------------------------------------------------------
+faster-whisper 1.2.1: MIT
+소스: https://github.com/SYSTRAN/faster-whisper/tree/v1.2.1
+원문: https://github.com/SYSTRAN/faster-whisper/blob/v1.2.1/LICENSE
+보존 원문: runtime/python/Lib/site-packages/faster_whisper-1.2.1.dist-info/LICENSE
+CTranslate2 4.8.2: MIT
+소스: https://github.com/OpenNMT/CTranslate2/tree/v4.8.2
+원문: https://github.com/OpenNMT/CTranslate2/blob/v4.8.2/LICENSE
+네이티브 CUDA/cuDNN 및 포함 종속 라이브러리의 권리는 별도입니다.
+
+7. NVIDIA CUDA / cuBLAS / cuDNN
+------------------------------------------------------------
+Python wheel의 METADATA에서 확인한 버전:
+  nvidia-cuda-runtime-cu12 12.9.79
+  nvidia-cuda-nvrtc-cu12   12.9.86
+  nvidia-cublas-cu12       12.9.2.10
+  nvidia-cudnn-cu12        9.27.0.42
+라이선스 표기: LicenseRef-NVIDIA-Proprietary
+프로젝트: https://developer.nvidia.com/cuda-zone
+          https://developer.nvidia.com/cudnn
+CUDA EULA: https://docs.nvidia.com/cuda/eula/index.html
+cuDNN EULA: https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/eula.html
+CUDA 12.4 문서: https://docs.nvidia.com/cuda/archive/12.4.1/eula/index.html
+로컬 원문은 다음 파일에 보존되어 있습니다. 웹의 latest 문서와 달리 실제
+받은 배포물의 약관은 각 파일에서 확인하십시오.
+  runtime/python/Lib/site-packages/nvidia_cuda_runtime_cu12-12.9.79.dist-info/licenses/License.txt
+  runtime/python/Lib/site-packages/nvidia_cuda_nvrtc_cu12-12.9.86.dist-info/licenses/License.txt
+  runtime/python/Lib/site-packages/nvidia_cublas_cu12-12.9.2.10.dist-info/licenses/License.txt
+  runtime/python/Lib/site-packages/nvidia_cudnn_cu12-9.27.0.42.dist-info/licenses/License.txt
+NVIDIA 구성요소를 외부에 복사/배포할 때에는 해당 버전에서 재배포 가능한
+파일과 조건을 확인해야 합니다. 이 파일을 작성하며 새로운 약관 수락,
+계정 가입 또는 외부 배포를 수행하지 않았습니다.
+
+8. PyAV / FFmpeg 및 네이티브 종속 라이브러리
+------------------------------------------------------------
+PyAV 19.0.1 자체: BSD-3-Clause
+소스: https://github.com/PyAV-Org/PyAV
+보존 원문: runtime/python/Lib/site-packages/av-19.0.1.dist-info/licenses/LICENSE.txt
+이 wheel의 FFmpeg: 9.0.2
+av._core.library_meta의 라이선스 문자열: LGPL version 3 or later
+FFmpeg 라이브러리 버전:
+  libavutil 61.1.102; libavcodec/libavformat/libavdevice 63.1.102;
+  libavfilter 12.1.102; libswscale 10.1.102; libswresample 7.1.102
+소스: https://ffmpeg.org/download.html
+라이선스 설명: https://ffmpeg.org/legal.html
+LGPL-3.0 원문: https://www.gnu.org/licenses/lgpl-3.0.html
+FFmpeg 및 코덱 DLL 위치: runtime/python/Lib/site-packages/av.libs/
+이 wheel에는 x264/x265를 비롯한 추가 코덱 DLL이 있으며 빌드 설정에도
+enable-libx264 / enable-libx265가 포함됩니다. 위 LGPL 문자열은 FFmpeg가
+보고한 값이며 av.libs 전체에 단일 라이선스를 부여한다는 뜻이 아닙니다.
+재배포 시 이들 코덱과 네이티브 종속성의 개별 라이선스 및 정확한 소스 제공
+조건도 확인해야 합니다. 이 고지 작성에서는 해당 소스 묶음을 수집하지 않았습니다.
+
+NumPy, ONNX Runtime, pip 등의 패키지도 하위 구성요소를 포함합니다.
+설치된 *.dist-info/licenses/ 아래 원문과 onnxruntime/LICENSE,
+onnxruntime/ThirdPartyNotices.txt 등 각 배포물이 제공한 고지를 보존하십시오.
+
+9. 설치된 Python 패키지 메타데이터 목록
+------------------------------------------------------------
+아래는 2026-10-05 설치 환경의 상위 패키지 라이선스 요약입니다.
+runtime/는 소스 공개 대상에 포함하지 않으며, 바이너리 재배포 시에는 실제 설치본의
+LICENSE/NOTICE 및 내장 제3자 라이선스가 우선합니다. 상위 패키지의 라이선스만으로
+CUDA, FFmpeg, 코덱 등 하위 바이너리 전체의 조건을 판단하지 마세요.
+PyTorch의 BSD-3-Clause와 함께 설치되는 CUDA의 약관도 별도입니다.
+이 목록의 링크와 고지만으로 실행본의 소스 제공 의무까지 완료한 것은 아닙니다.
+
+annotated-doc 0.0.5
+  라이선스 표기: MIT
+  프로젝트: https://github.com/fastapi/annotated-doc
+  보존 원문: runtime/python/Lib/site-packages/annotated_doc-0.0.5.dist-info/licenses/LICENSE
+
+annotated-types 0.8.0
+  라이선스 표기: MIT
+  프로젝트: https://github.com/annotated-types/annotated-types
+  보존 원문: runtime/python/Lib/site-packages/annotated_types-0.8.0.dist-info/licenses/LICENSE
+
+anyio 4.15.1
+  라이선스 표기: MIT
+  프로젝트: https://anyio.readthedocs.io/en/latest/
+  보존 원문: runtime/python/Lib/site-packages/anyio-4.15.1.dist-info/licenses/LICENSE
+
+av 19.0.1
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://github.com/PyAV-Org/PyAV/issues
+  보존 원문: runtime/python/Lib/site-packages/av-19.0.1.dist-info/licenses/__pycache__/AUTHORS.cpython-312.pyc
+  보존 원문: runtime/python/Lib/site-packages/av-19.0.1.dist-info/licenses/AUTHORS.py
+  보존 원문: runtime/python/Lib/site-packages/av-19.0.1.dist-info/licenses/AUTHORS.rst
+  보존 원문: runtime/python/Lib/site-packages/av-19.0.1.dist-info/licenses/LICENSE.txt
+
+certifi 2026.7.22
+  라이선스 표기: Mozilla Public License 2.0 (MPL 2.0)
+  프로젝트: https://github.com/certifi/python-certifi
+  보존 원문: runtime/python/Lib/site-packages/certifi-2026.7.22.dist-info/licenses/LICENSE
+
+cffi 2.1.1
+  라이선스 표기: MIT-0
+  프로젝트: https://cffi.readthedocs.io/
+  보존 원문: runtime/python/Lib/site-packages/cffi-2.1.1.dist-info/licenses/LICENSE
+
+charset-normalizer 3.5.2
+  라이선스 표기: MIT
+  프로젝트: https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md
+  보존 원문: runtime/python/Lib/site-packages/charset_normalizer-3.5.2.dist-info/licenses/LICENSE
+
+click 8.5.0
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://click.palletsprojects.com/page/changes/
+  보존 원문: runtime/python/Lib/site-packages/click-8.5.0.dist-info/licenses/LICENSE.txt
+
+colorama 0.4.6
+  라이선스 표기: BSD License
+  프로젝트: https://github.com/tartley/colorama
+  보존 원문: runtime/python/Lib/site-packages/colorama-0.4.6.dist-info/licenses/LICENSE.txt
+
+ctranslate2 4.8.2
+  라이선스 표기: MIT
+  프로젝트: https://opennmt.net
+  원문: 해당 버전의 공식 배포처 LICENSE/NOTICE 확인
+
+fastapi 0.142.2
+  라이선스 표기: MIT
+  프로젝트: https://github.com/fastapi/fastapi
+  보존 원문: runtime/python/Lib/site-packages/fastapi-0.142.2.dist-info/licenses/LICENSE
+
+faster-whisper 1.2.1
+  라이선스 표기: MIT License
+  프로젝트: https://github.com/SYSTRAN/faster-whisper
+  보존 원문: runtime/python/Lib/site-packages/faster_whisper-1.2.1.dist-info/LICENSE
+
+filelock 4.0.9
+  라이선스 표기: MIT
+  프로젝트: https://py-filelock.readthedocs.io
+  보존 원문: runtime/python/Lib/site-packages/filelock-4.0.9.dist-info/licenses/LICENSE
+
+flatbuffers 25.12.19
+  라이선스 표기: Apache Software License
+  프로젝트: https://google.github.io/flatbuffers/
+  원문: 해당 버전의 공식 배포처 LICENSE/NOTICE 확인
+
+fsspec 2026.9.0
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://filesystem-spec.readthedocs.io/en/latest/changelog.html
+  보존 원문: runtime/python/Lib/site-packages/fsspec-2026.9.0.dist-info/licenses/LICENSE
+
+h11 0.16.0
+  라이선스 표기: MIT License
+  프로젝트: https://github.com/python-hyper/h11
+  보존 원문: runtime/python/Lib/site-packages/h11-0.16.0.dist-info/licenses/LICENSE.txt
+
+hf-xet 1.6.0
+  라이선스 표기: Apache-2.0
+  프로젝트: https://huggingface.co/docs/hub/xet/index
+  보존 원문: runtime/python/Lib/site-packages/hf_xet-1.6.0.dist-info/licenses/LICENSE
+
+httpcore 1.0.9
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://www.encode.io/httpcore
+  보존 원문: runtime/python/Lib/site-packages/httpcore-1.0.9.dist-info/licenses/LICENSE.md
+
+httpx 0.28.1
+  라이선스 표기: BSD License
+  프로젝트: https://github.com/encode/httpx/blob/master/CHANGELOG.md
+  보존 원문: runtime/python/Lib/site-packages/httpx-0.28.1.dist-info/licenses/LICENSE.md
+
+huggingface_hub 1.33.0
+  라이선스 표기: Apache Software License
+  프로젝트: https://github.com/huggingface/huggingface_hub
+  보존 원문: runtime/python/Lib/site-packages/huggingface_hub-1.33.0.dist-info/licenses/LICENSE
+
+idna 3.20
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://github.com/kjd/idna/blob/master/HISTORY.md
+  보존 원문: runtime/python/Lib/site-packages/idna-3.20.dist-info/licenses/LICENSE.md
+
+iniconfig 2.3.0
+  라이선스 표기: MIT
+  프로젝트: https://github.com/pytest-dev/iniconfig
+  보존 원문: runtime/python/Lib/site-packages/iniconfig-2.3.0.dist-info/licenses/LICENSE
+
+Jinja2 3.1.6
+  라이선스 표기: BSD License
+  프로젝트: https://jinja.palletsprojects.com/changes/
+  보존 원문: runtime/python/Lib/site-packages/jinja2-3.1.6.dist-info/licenses/LICENSE.txt
+
+llvmlite 0.50.0
+  라이선스 표기: BSD-2-Clause AND Apache-2.0 WITH LLVM-exception
+  프로젝트: http://llvmlite.readthedocs.io
+  보존 원문: runtime/python/Lib/site-packages/llvmlite-0.50.0.dist-info/licenses/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/llvmlite-0.50.0.dist-info/licenses/LICENSE.thirdparty
+
+markdown-it-py 4.2.0
+  라이선스 표기: MIT License
+  프로젝트: https://markdown-it-py.readthedocs.io
+  보존 원문: runtime/python/Lib/site-packages/markdown_it_py-4.2.0.dist-info/licenses/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/markdown_it_py-4.2.0.dist-info/licenses/LICENSE.markdown-it
+
+MarkupSafe 3.0.4
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://palletsprojects.com/donate
+  보존 원문: runtime/python/Lib/site-packages/markupsafe-3.0.4.dist-info/licenses/LICENSE.txt
+
+mdurl 0.1.2
+  라이선스 표기: MIT License
+  프로젝트: https://github.com/executablebooks/mdurl
+  보존 원문: runtime/python/Lib/site-packages/mdurl-0.1.2.dist-info/LICENSE
+
+mpmath 1.3.0
+  라이선스 표기: BSD License
+  프로젝트: http://mpmath.org/
+  보존 원문: runtime/python/Lib/site-packages/mpmath-1.3.0.dist-info/LICENSE
+
+networkx 3.7
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://networkx.org/
+  보존 원문: runtime/python/Lib/site-packages/networkx-3.7.dist-info/licenses/LICENSE.txt
+
+numba 0.68.0
+  라이선스 표기: BSD License
+  프로젝트: https://numba.pydata.org
+  보존 원문: runtime/python/Lib/site-packages/numba-0.68.0.dist-info/licenses/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/numba-0.68.0.dist-info/licenses/LICENSES.third-party
+
+numpy 2.5.3
+  라이선스 표기: BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+  프로젝트: https://numpy.org
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/_core/include/numpy/libdivide/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/_core/src/common/pythoncapi-compat/COPYING
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/_core/src/highway/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/_core/src/umath/svml/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/fft/pocketfft/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/linalg/lapack_lite/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/ma/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/distributions/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/mt19937/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/pcg64/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/philox/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/sfc64/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/numpy-2.5.3.dist-info/licenses/numpy/random/src/splitmix64/LICENSE.md
+
+nvidia-cublas-cu12 12.9.2.10
+  라이선스 표기: LicenseRef-NVIDIA-Proprietary
+  프로젝트: https://developer.nvidia.com/cuda-zone
+  보존 원문: runtime/python/Lib/site-packages/nvidia_cublas_cu12-12.9.2.10.dist-info/licenses/License.txt
+
+nvidia-cuda-nvrtc-cu12 12.9.86
+  라이선스 표기: Other/Proprietary License
+  프로젝트: https://developer.nvidia.com/cuda-zone
+  보존 원문: runtime/python/Lib/site-packages/nvidia_cuda_nvrtc_cu12-12.9.86.dist-info/licenses/License.txt
+
+nvidia-cuda-runtime-cu12 12.9.79
+  라이선스 표기: Other/Proprietary License
+  프로젝트: https://developer.nvidia.com/cuda-zone
+  보존 원문: runtime/python/Lib/site-packages/nvidia_cuda_runtime_cu12-12.9.79.dist-info/licenses/License.txt
+
+nvidia-cudnn-cu12 9.27.0.42
+  라이선스 표기: LicenseRef-NVIDIA-Proprietary
+  프로젝트: https://developer.nvidia.com/cuda-zone
+  보존 원문: runtime/python/Lib/site-packages/nvidia_cudnn_cu12-9.27.0.42.dist-info/licenses/License.txt
+
+onnxruntime 1.30.0
+  라이선스 표기: MIT License
+  프로젝트: https://onnxruntime.ai
+  보존 원문: runtime/python/Lib/site-packages/onnxruntime/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/onnxruntime/ThirdPartyNotices.txt
+
+opentelemetry-api 1.45.0
+  라이선스 표기: Apache-2.0
+  프로젝트: https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api
+  보존 원문: runtime/python/Lib/site-packages/opentelemetry_api-1.45.0.dist-info/licenses/LICENSE
+
+packaging 26.3
+  라이선스 표기: Apache-2.0 OR BSD-2-Clause
+  프로젝트: https://packaging.pypa.io/
+  보존 원문: runtime/python/Lib/site-packages/packaging-26.3.dist-info/licenses/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/packaging-26.3.dist-info/licenses/LICENSE.APACHE
+  보존 원문: runtime/python/Lib/site-packages/packaging-26.3.dist-info/licenses/LICENSE.BSD
+
+pip 26.2.1
+  라이선스 표기: MIT
+  프로젝트: https://pip.pypa.io/en/stable/news/
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/AUTHORS.txt
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/cachecontrol/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/certifi/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/distlib/LICENSE.txt
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/distro/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/msgpack/COPYING
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE.APACHE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE.BSD
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/pkg_resources/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/platformdirs/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/pygments/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/pyproject_hooks/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/requests/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/resolvelib/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/rich/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/tomli/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/tomli_w/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/truststore/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/pip-26.2.1.dist-info/licenses/src/pip/_vendor/urllib3/LICENSE.txt
+
+pluggy 1.6.0
+  라이선스 표기: MIT License
+  보존 원문: runtime/python/Lib/site-packages/pluggy-1.6.0.dist-info/licenses/LICENSE
+
+protobuf 7.36.2
+  라이선스 표기: 3-Clause BSD License
+  프로젝트: https://developers.google.com/protocol-buffers/
+  보존 원문: runtime/python/Lib/site-packages/protobuf-7.36.2.dist-info/LICENSE
+
+pycparser 3.0
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://github.com/eliben/pycparser
+  보존 원문: runtime/python/Lib/site-packages/pycparser-3.0.dist-info/licenses/LICENSE
+
+pydantic 2.13.5
+  라이선스 표기: MIT
+  프로젝트: https://github.com/pydantic/pydantic
+  보존 원문: runtime/python/Lib/site-packages/pydantic-2.13.5.dist-info/licenses/LICENSE
+
+pydantic_core 2.46.5
+  라이선스 표기: MIT
+  프로젝트: https://github.com/pydantic/pydantic
+  보존 원문: runtime/python/Lib/site-packages/pydantic_core-2.46.5.dist-info/licenses/LICENSE
+
+Pygments 2.21.0
+  라이선스 표기: BSD-2-Clause
+  프로젝트: https://pygments.org
+  보존 원문: runtime/python/Lib/site-packages/pygments-2.21.0.dist-info/licenses/AUTHORS
+  보존 원문: runtime/python/Lib/site-packages/pygments-2.21.0.dist-info/licenses/LICENSE
+
+pytest 9.1.1
+  라이선스 표기: MIT
+  프로젝트: https://docs.pytest.org/en/stable/changelog.html
+  보존 원문: runtime/python/Lib/site-packages/pytest-9.1.1.dist-info/licenses/LICENSE
+
+pytest-asyncio 1.4.0
+  라이선스 표기: Apache-2.0
+  프로젝트: https://github.com/pytest-dev/pytest-asyncio/issues
+  보존 원문: runtime/python/Lib/site-packages/pytest_asyncio-1.4.0.dist-info/licenses/LICENSE
+
+PyYAML 6.0.3
+  라이선스 표기: MIT License
+  프로젝트: https://pyyaml.org/
+  보존 원문: runtime/python/Lib/site-packages/pyyaml-6.0.3.dist-info/licenses/LICENSE
+
+regex 2026.9.29
+  라이선스 표기: Apache-2.0 AND CNRI-Python
+  프로젝트: https://github.com/mrabarnett/mrab-regex
+  보존 원문: runtime/python/Lib/site-packages/regex-2026.9.29.dist-info/licenses/LICENSE.txt
+
+requests 2.34.2
+  라이선스 표기: Apache Software License
+  프로젝트: https://requests.readthedocs.io
+  보존 원문: runtime/python/Lib/site-packages/requests-2.34.2.dist-info/licenses/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/requests-2.34.2.dist-info/licenses/NOTICE
+
+rich 15.0.0
+  라이선스 표기: MIT License
+  프로젝트: https://rich.readthedocs.io/en/latest/
+  보존 원문: runtime/python/Lib/site-packages/rich-15.0.0.dist-info/licenses/LICENSE
+
+safetensors 0.8.0
+  라이선스 표기: Apache Software License
+  프로젝트: https://github.com/huggingface/safetensors
+  보존 원문: runtime/python/Lib/site-packages/safetensors-0.8.0.dist-info/licenses/LICENSE
+
+setuptools 81.0.0
+  라이선스 표기: MIT
+  프로젝트: https://github.com/pypa/setuptools
+  보존 원문: runtime/python/Lib/site-packages/setuptools-81.0.0.dist-info/licenses/LICENSE
+
+shellingham 1.5.4
+  라이선스 표기: ISC License (ISCL)
+  프로젝트: https://github.com/sarugaku/shellingham
+  보존 원문: runtime/python/Lib/site-packages/shellingham-1.5.4.dist-info/LICENSE
+
+soundfile 0.13.1
+  라이선스 표기: BSD License
+  프로젝트: https://github.com/bastibe/python-soundfile
+  보존 원문: runtime/python/Lib/site-packages/soundfile-0.13.1.dist-info/LICENSE
+
+starlette 1.7.0
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://github.com/Kludex/starlette
+  보존 원문: runtime/python/Lib/site-packages/starlette-1.7.0.dist-info/licenses/LICENSE.md
+
+sympy 1.14.0
+  라이선스 표기: BSD License
+  프로젝트: https://sympy.org
+  보존 원문: runtime/python/Lib/site-packages/sympy-1.14.0.dist-info/licenses/AUTHORS
+  보존 원문: runtime/python/Lib/site-packages/sympy-1.14.0.dist-info/licenses/LICENSE
+
+tiktoken 0.14.0
+  라이선스 표기: MIT License
+  프로젝트: https://github.com/openai/tiktoken
+  보존 원문: runtime/python/Lib/site-packages/tiktoken-0.14.0.dist-info/licenses/LICENSE
+
+tokenizers 0.23.2
+  라이선스 표기: Apache Software License
+  프로젝트: https://github.com/huggingface/tokenizers
+  원문: 해당 버전의 공식 배포처 LICENSE/NOTICE 확인
+
+torch 2.11.0+cu128
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://pytorch.org
+  보존 원문: runtime/python/Lib/site-packages/torch-2.11.0+cu128.dist-info/LICENSE
+  보존 원문: runtime/python/Lib/site-packages/torch-2.11.0+cu128.dist-info/NOTICE
+
+tqdm 4.70.1
+  라이선스 표기: MPL-2.0 AND MIT
+  프로젝트: https://tqdm.github.io
+  보존 원문: runtime/python/Lib/site-packages/tqdm-4.70.1.dist-info/licenses/LICENCE
+
+transformers 5.18.0
+  라이선스 표기: Apache 2.0 License
+  프로젝트: https://github.com/huggingface/transformers
+  보존 원문: runtime/python/Lib/site-packages/transformers-5.18.0.dist-info/licenses/LICENSE
+
+typer 0.27.2
+  라이선스 표기: MIT
+  프로젝트: https://github.com/fastapi/typer
+  보존 원문: runtime/python/Lib/site-packages/typer-0.27.2.dist-info/licenses/LICENSE
+
+typing_extensions 4.16.0
+  라이선스 표기: PSF-2.0
+  프로젝트: https://github.com/python/typing_extensions/issues
+  보존 원문: runtime/python/Lib/site-packages/typing_extensions-4.16.0.dist-info/licenses/LICENSE
+
+typing-inspection 0.4.4
+  라이선스 표기: MIT
+  프로젝트: https://github.com/pydantic/typing-inspection
+  보존 원문: runtime/python/Lib/site-packages/typing_inspection-0.4.4.dist-info/licenses/LICENSE
+
+urllib3 2.8.0
+  라이선스 표기: MIT
+  프로젝트: https://github.com/urllib3/urllib3/blob/main/CHANGES.rst
+  보존 원문: runtime/python/Lib/site-packages/urllib3-2.8.0.dist-info/licenses/LICENSE.txt
+
+uvicorn 0.54.0
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://uvicorn.dev/release-notes
+  보존 원문: runtime/python/Lib/site-packages/uvicorn-0.54.0.dist-info/licenses/LICENSE.md
+
+websockets 17.2
+  라이선스 표기: BSD-3-Clause
+  프로젝트: https://github.com/python-websockets/websockets
+  보존 원문: runtime/python/Lib/site-packages/websockets-17.2.dist-info/licenses/LICENSE
+

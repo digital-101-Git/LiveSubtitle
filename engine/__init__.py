@@ -1,0 +1,1 @@
+"""LiveSubtitle local inference service."""

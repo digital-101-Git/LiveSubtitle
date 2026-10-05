@@ -1,0 +1,452 @@
+[
+  {
+    "source": "시스템 전체 소리 · 다른 앱 소리도 포함",
+    "en": "All system audio · includes other apps",
+    "zh": "系统全部声音 · 包含其他应用的声音",
+    "ja": "システム全体の音声 · 他のアプリの音声も含む"
+  },
+  {
+    "source": "마이크 목록 COM 초기화",
+    "en": "Initialize COM for microphone list",
+    "zh": "初始化麦克风列表 COM",
+    "ja": "マイク一覧の COM 初期化"
+  },
+  {
+    "source": "마이크 목록 읽기",
+    "en": "Read microphone list",
+    "zh": "读取麦克风列表",
+    "ja": "マイク一覧の読み取り"
+  },
+  {
+    "source": "마이크 수 확인",
+    "en": "Check microphone count",
+    "zh": "检查麦克风数量",
+    "ja": "マイク数の確認"
+  },
+  {
+    "source": "마이크 장치 읽기",
+    "en": "Read microphone device",
+    "zh": "读取麦克风设备",
+    "ja": "マイクデバイスの読み取り"
+  },
+  {
+    "source": "마이크 연결 상태 확인",
+    "en": "Check microphone connection",
+    "zh": "检查麦克风连接状态",
+    "ja": "マイクの接続状態の確認"
+  },
+  {
+    "source": "마이크 ID 읽기",
+    "en": "Read microphone ID",
+    "zh": "读取麦克风 ID",
+    "ja": "マイク ID の読み取り"
+  },
+  {
+    "source": "선택한 마이크 찾기",
+    "en": "Find selected microphone",
+    "zh": "查找所选麦克风",
+    "ja": "選択したマイクの検索"
+  },
+  {
+    "source": "선택한 마이크 연결 상태 확인",
+    "en": "Check selected microphone connection",
+    "zh": "检查所选麦克风的连接状态",
+    "ja": "選択したマイクの接続状態の確認"
+  },
+  {
+    "source": "선택한 마이크가 연결되어 있지 않거나 사용 중지되었습니다. 오디오 입력 목록을 새로 고친 뒤 다시 선택하세요.",
+    "en": "The selected microphone is disconnected or disabled. Refresh the audio input list and select it again.",
+    "zh": "所选麦克风未连接或已禁用。请刷新音频输入列表后重新选择。",
+    "ja": "選択したマイクは接続されていないか、無効になっています。音声入力一覧を更新して再度選択してください。"
+  },
+  {
+    "source": "마이크 입력 방향 확인",
+    "en": "Check microphone input direction",
+    "zh": "检查麦克风输入方向",
+    "ja": "マイクの入力方向の確認"
+  },
+  {
+    "source": "선택한 장치는 마이크 입력 장치가 아닙니다.",
+    "en": "The selected device is not a microphone input.",
+    "zh": "所选设备不是麦克风输入设备。",
+    "ja": "選択したデバイスはマイク入力デバイスではありません。"
+  },
+  {
+    "source": "선택한 마이크 캡처 열기",
+    "en": "Open selected microphone capture",
+    "zh": "打开所选麦克风的音频采集",
+    "ja": "選択したマイクの音声キャプチャを開く"
+  },
+  {
+    "source": "마이크 이름 속성 열기",
+    "en": "Open microphone name property",
+    "zh": "打开麦克风名称属性",
+    "ja": "マイク名のプロパティを開く"
+  },
+  {
+    "source": "마이크 이름 읽기",
+    "en": "Read microphone name",
+    "zh": "读取麦克风名称",
+    "ja": "マイク名の読み取り"
+  },
+  {
+    "source": "마이크 장치 ID가 비어 있습니다.",
+    "en": "The microphone device ID is empty.",
+    "zh": "麦克风设备 ID 为空。",
+    "ja": "マイクデバイス ID が空です。"
+  },
+  {
+    "source": "브라우저 프로세스와 마이크를 동시에 선택할 수 없습니다.",
+    "en": "A browser process and microphone cannot be selected at the same time.",
+    "zh": "无法同时选择浏览器进程和麦克风。",
+    "ja": "ブラウザのプロセスとマイクを同時に選択することはできません。"
+  },
+  {
+    "source": "오디오 캡처가 이미 실행 중입니다.",
+    "en": "Audio capture is already running.",
+    "zh": "音频采集已在运行。",
+    "ja": "音声キャプチャはすでに実行中です。"
+  },
+  {
+    "source": "오디오 캡처 종료를 기다리는 중입니다. 새 캡처는 종료 후 시작할 수 있습니다.",
+    "en": "Waiting for audio capture to stop. A new capture can start after it stops.",
+    "zh": "正在等待音频采集停止。停止后即可开始新的采集。",
+    "ja": "音声キャプチャの終了を待っています。終了後に新しいキャプチャを開始できます。"
+  },
+  {
+    "source": "COM 초기화",
+    "en": "Initialize COM",
+    "zh": "初始化 COM",
+    "ja": "COM の初期化"
+  },
+  {
+    "source": "마이크 장치 형식 읽기",
+    "en": "Read microphone device format",
+    "zh": "读取麦克风设备格式",
+    "ja": "マイクデバイス形式の読み取り"
+  },
+  {
+    "source": "프로세스 오디오 캡처에는 Windows 빌드 20348 이상이 필요합니다.",
+    "en": "Process audio capture requires Windows build 20348 or later.",
+    "zh": "进程音频采集需要 Windows 内部版本 20348 或更高版本。",
+    "ja": "プロセスの音声キャプチャには Windows ビルド 20348 以降が必要です。"
+  },
+  {
+    "source": "오디오 장치 형식 읽기",
+    "en": "Read audio device format",
+    "zh": "读取音频设备格式",
+    "ja": "音声デバイス形式の読み取り"
+  },
+  {
+    "source": "오디오 캡처 초기화",
+    "en": "Initialize audio capture",
+    "zh": "初始化音频采集",
+    "ja": "音声キャプチャの初期化"
+  },
+  {
+    "source": "오디오 이벤트 설정",
+    "en": "Set audio event",
+    "zh": "设置音频事件",
+    "ja": "音声イベントの設定"
+  },
+  {
+    "source": "오디오 캡처 서비스 열기",
+    "en": "Open audio capture service",
+    "zh": "打开音频采集服务",
+    "ja": "音声キャプチャサービスを開く"
+  },
+  {
+    "source": "오디오 캡처 시작",
+    "en": "Start audio capture",
+    "zh": "开始音频采集",
+    "ja": "音声キャプチャの開始"
+  },
+  {
+    "source": "오디오 패킷 확인",
+    "en": "Check audio packet",
+    "zh": "检查音频数据包",
+    "ja": "音声パケットの確認"
+  },
+  {
+    "source": "오디오 패킷 읽기",
+    "en": "Read audio packet",
+    "zh": "读取音频数据包",
+    "ja": "音声パケットの読み取り"
+  },
+  {
+    "source": "오디오 패킷 주소가 비어 있습니다.",
+    "en": "The audio packet address is empty.",
+    "zh": "音频数据包地址为空。",
+    "ja": "音声パケットのアドレスが空です。"
+  },
+  {
+    "source": "오디오 패킷 반환",
+    "en": "Release audio packet",
+    "zh": "释放音频数据包",
+    "ja": "音声パケットの解放"
+  },
+  {
+    "source": "다음 오디오 패킷 확인",
+    "en": "Check next audio packet",
+    "zh": "检查下一个音频数据包",
+    "ja": "次の音声パケットの確認"
+  },
+  {
+    "source": "기본 출력 장치 찾기",
+    "en": "Find default output device",
+    "zh": "查找默认输出设备",
+    "ja": "既定の出力デバイスの検索"
+  },
+  {
+    "source": "출력 장치 캡처 열기",
+    "en": "Open output device capture",
+    "zh": "打开输出设备的音频采集",
+    "ja": "出力デバイスの音声キャプチャを開く"
+  },
+  {
+    "source": "프로세스 오디오 캡처 열기",
+    "en": "Open process audio capture",
+    "zh": "打开进程音频采集",
+    "ja": "プロセスの音声キャプチャを開く"
+  },
+  {
+    "source": "프로세스 오디오 활성화",
+    "en": "Activate process audio",
+    "zh": "激活进程音频",
+    "ja": "プロセス音声の有効化"
+  },
+  {
+    "source": "프로세스 오디오 인터페이스가 없습니다.",
+    "en": "The process audio interface is unavailable.",
+    "zh": "进程音频接口不可用。",
+    "ja": "プロセスの音声インターフェイスがありません。"
+  },
+  {
+    "source": "engine\\server.py와 models 폴더를 찾을 수 없습니다. 배포 폴더 전체를 같은 위치에 두세요.",
+    "en": "Cannot find engine\\server.py and the models folder. Keep the entire distribution folder together.",
+    "zh": "找不到 engine\\server.py 和 models 文件夹。请将完整的分发文件夹保存在同一位置。",
+    "ja": "engine\\server.py と models フォルダーが見つかりません。配布フォルダー全体を同じ場所に置いてください。"
+  },
+  {
+    "source": "실행 중인 로컬 엔진에 연결했습니다.",
+    "en": "Connected to the running local engine.",
+    "zh": "已连接到正在运行的本地引擎。",
+    "ja": "実行中のローカルエンジンに接続しました。"
+  },
+  {
+    "source": "앱이 시작한 엔진의 준비를 기다립니다.",
+    "en": "Waiting for the engine started by this app.",
+    "zh": "正在等待此应用启动的引擎就绪。",
+    "ja": "アプリが起動したエンジンの準備を待っています。"
+  },
+  {
+    "source": "로컬 엔진 준비 완료 · 127.0.0.1:17865",
+    "en": "Local engine ready · 127.0.0.1:17865",
+    "zh": "本地引擎已就绪 · 127.0.0.1:17865",
+    "ja": "ローカルエンジンの準備完了 · 127.0.0.1:17865"
+  },
+  {
+    "source": "로컬 엔진이 60초 안에 응답하지 않았습니다. 진행 기록을 확인한 뒤 다시 연결하세요.",
+    "en": "The local engine did not respond within 60 seconds. Check the activity log and reconnect.",
+    "zh": "本地引擎在 60 秒内未响应。请检查运行日志后重新连接。",
+    "ja": "ローカルエンジンが 60 秒以内に応答しませんでした。実行ログを確認して再接続してください。"
+  },
+  {
+    "source": "로컬 Python 엔진을 시작했습니다.",
+    "en": "Started the local Python engine.",
+    "zh": "已启动本地 Python 引擎。",
+    "ja": "ローカル Python エンジンを起動しました。"
+  },
+  {
+    "source": "Python 엔진을 실행할 수 없습니다. 배포 runtime 폴더와 엔진 파일을 확인하세요.",
+    "en": "Cannot start the Python engine. Check the distribution's runtime folder and engine files.",
+    "zh": "无法启动 Python 引擎。请检查分发目录中的 runtime 文件夹和引擎文件。",
+    "ja": "Python エンジンを起動できません。配布用の runtime フォルダーとエンジンファイルを確認してください。"
+  },
+  {
+    "source": "17865 포트를 다른 서비스가 사용하고 있습니다. 해당 서비스를 종료하거나 포트 충돌을 해결하세요.",
+    "en": "Another service is using port 17865. Stop that service or resolve the port conflict.",
+    "zh": "其他服务正在使用端口 17865。请停止该服务或解决端口冲突。",
+    "ja": "別のサービスがポート 17865 を使用しています。そのサービスを終了するか、ポートの競合を解消してください。"
+  },
+  {
+    "source": "엔진 인증 토큰이 없습니다. 이 앱과 엔진의 배포 폴더가 같은지 확인하세요.",
+    "en": "The engine authentication token is missing. Check that this app and the engine share the same distribution folder.",
+    "zh": "缺少引擎身份验证令牌。请确认此应用与引擎位于同一分发文件夹。",
+    "ja": "エンジンの認証トークンがありません。アプリとエンジンが同じ配布フォルダーにあることを確認してください。"
+  },
+  {
+    "source": "오디오 전송 대기열이 가득 차 자막 세션을 중지합니다.",
+    "en": "The audio send queue is full. Stopping the subtitle session.",
+    "zh": "音频发送队列已满，正在停止字幕会话。",
+    "ja": "音声送信キューがいっぱいになったため、字幕セッションを停止します。"
+  },
+  {
+    "source": "오디오 전송 대기열이 6초를 초과해 중지했습니다. 음성을 건너뛰지 않도록 연결과 시스템 부하를 확인한 뒤 다시 시작하세요.",
+    "en": "Stopped because the audio send queue exceeded 6 seconds. Check the connection and system load, then restart to avoid skipping speech.",
+    "zh": "音频发送队列超过 6 秒，已停止。请检查连接和系统负载后重新开始，以免跳过语音。",
+    "ja": "音声送信キューが 6 秒を超えたため停止しました。音声を飛ばさないよう、接続とシステム負荷を確認して再開してください。"
+  },
+  {
+    "source": "엔진이 자막 연결을 종료했습니다.",
+    "en": "The engine closed the subtitle connection.",
+    "zh": "引擎已关闭字幕连接。",
+    "ja": "エンジンが字幕接続を終了しました。"
+  },
+  {
+    "source": "엔진 메시지가 허용 크기를 초과했습니다.",
+    "en": "The engine message exceeded the allowed size.",
+    "zh": "引擎消息超过了允许的大小。",
+    "ja": "エンジンのメッセージが許容サイズを超えました。"
+  },
+  {
+    "source": "WAVEFORMATEXTENSIBLE 형식이 잘못되었습니다.",
+    "en": "Invalid WAVEFORMATEXTENSIBLE format.",
+    "zh": "WAVEFORMATEXTENSIBLE 格式无效。",
+    "ja": "WAVEFORMATEXTENSIBLE の形式が不正です。"
+  },
+  {
+    "source": "오디오 프레임 크기가 잘못되었습니다.",
+    "en": "Invalid audio frame size.",
+    "zh": "音频帧大小无效。",
+    "ja": "音声フレームのサイズが不正です。"
+  },
+  {
+    "source": "오디오 패킷 길이가 프레임 수와 일치하지 않습니다.",
+    "en": "The audio packet length does not match the frame count.",
+    "zh": "音频数据包长度与帧数不匹配。",
+    "ja": "音声パケットの長さとフレーム数が一致しません。"
+  },
+  {
+    "source": "표시할 자막이 60개를 초과해 중지했습니다. 문장을 건너뛰지 않도록 자막을 다시 시작하세요.",
+    "en": "Stopped because more than 60 captions were waiting for display. Restart subtitles to avoid skipping sentences.",
+    "zh": "等待显示的字幕超过 60 条，已停止。请重新启动字幕，以免跳过句子。",
+    "ja": "表示待ちの字幕が 60 件を超えたため停止しました。文を飛ばさないよう、字幕を再開してください。"
+  },
+  {
+    "source": "LiveSubtitle 자막",
+    "en": "LiveSubtitle Captions",
+    "zh": "LiveSubtitle 字幕",
+    "ja": "LiveSubtitle 字幕"
+  },
+  {
+    "source": "드래그해서 이동 · 모서리에서 크기 조절 · 놓은 위치 자동 저장",
+    "en": "Drag to move · Resize at the corners · Position saved automatically",
+    "zh": "拖动以移动 · 拖动边角调整大小 · 自动保存位置",
+    "ja": "ドラッグで移動 · 角でサイズ変更 · 配置を自動保存"
+  },
+  {
+    "source": "실시간 번역 자막이 여기에 표시됩니다.",
+    "en": "Live translated captions appear here.",
+    "zh": "实时翻译字幕将在此处显示。",
+    "ja": "リアルタイム翻訳字幕がここに表示されます。"
+  },
+  {
+    "source": "Live captions appear here.",
+    "en": "Live captions appear here.",
+    "zh": "实时字幕将在此处显示。",
+    "ja": "リアルタイム字幕がここに表示されます。"
+  },
+  {
+    "source": "LiveSubtitle 오류",
+    "en": "LiveSubtitle Error",
+    "zh": "LiveSubtitle 错误",
+    "ja": "LiveSubtitle エラー"
+  },
+  {
+    "source": "LiveSubtitle 시작 오류",
+    "en": "LiveSubtitle Startup Error",
+    "zh": "LiveSubtitle 启动错误",
+    "ja": "LiveSubtitle 起動エラー"
+  },
+  {
+    "source": "마이크 · {0}",
+    "en": "Microphone · {0}",
+    "zh": "麦克风 · {0}",
+    "ja": "マイク · {0}"
+  },
+  {
+    "source": "오디오 입력 장치 ({0})",
+    "en": "Audio input device ({0})",
+    "zh": "音频输入设备（{0}）",
+    "ja": "音声入力デバイス（{0}）"
+  },
+  {
+    "source": "마이크 목록의 장치를 읽지 못했습니다: {0}",
+    "en": "Could not read a device in the microphone list: {0}",
+    "zh": "无法读取麦克风列表中的设备：{0}",
+    "ja": "マイク一覧のデバイスを読み取れませんでした: {0}"
+  },
+  {
+    "source": "마이크 목록을 읽지 못했습니다: {0}",
+    "en": "Could not read the microphone list: {0}",
+    "zh": "无法读取麦克风列表：{0}",
+    "ja": "マイク一覧を読み取れませんでした: {0}"
+  },
+  {
+    "source": "선택한 마이크에서 소리를 가져올 수 없습니다. 연결 상태와 Windows 마이크 접근 권한을 확인하세요. {0}",
+    "en": "Cannot capture audio from the selected microphone. Check its connection and Windows microphone permissions. {0}",
+    "zh": "无法从所选麦克风采集音频。请检查连接状态及 Windows 麦克风访问权限。{0}",
+    "ja": "選択したマイクから音声を取得できません。接続状態と Windows のマイクアクセス権限を確認してください。{0}"
+  },
+  {
+    "source": "오디오 캡처가 중단되었습니다: {0}",
+    "en": "Audio capture stopped: {0}",
+    "zh": "音频采集已中断：{0}",
+    "ja": "音声キャプチャが中断されました: {0}"
+  },
+  {
+    "source": "{0} 실패 (0x{1:X8}): {2}",
+    "en": "{0} failed (0x{1:X8}): {2}",
+    "zh": "{0}失败（0x{1:X8}）：{2}",
+    "ja": "{0}に失敗しました（0x{1:X8}）: {2}"
+  },
+  {
+    "source": "엔진 프로세스가 종료되었습니다 (코드 {0}). 진행 기록을 확인하세요.",
+    "en": "The engine process exited (code {0}). Check the activity log.",
+    "zh": "引擎进程已退出（代码 {0}）。请检查运行日志。",
+    "ja": "エンジンのプロセスが終了しました（コード {0}）。実行ログを確認してください。"
+  },
+  {
+    "source": "Python 종료 코드: {0}",
+    "en": "Python exit code: {0}",
+    "zh": "Python 退出代码：{0}",
+    "ja": "Python 終了コード: {0}"
+  },
+  {
+    "source": "엔진 요청 실패 ({0}): {1}",
+    "en": "Engine request failed ({0}): {1}",
+    "zh": "引擎请求失败（{0}）：{1}",
+    "ja": "エンジンへのリクエストに失敗しました（{0}）: {1}"
+  },
+  {
+    "source": "지원하지 않는 오디오 하위 형식: {0}",
+    "en": "Unsupported audio subformat: {0}",
+    "zh": "不支持的音频子格式：{0}",
+    "ja": "サポートされていない音声サブ形式: {0}"
+  },
+  {
+    "source": "지원하지 않는 오디오 형식: {0}",
+    "en": "Unsupported audio format: {0}",
+    "zh": "不支持的音频格式：{0}",
+    "ja": "サポートされていない音声形式: {0}"
+  },
+  {
+    "source": "지원하지 않는 오디오 속도/채널: {0} Hz, {1} ch",
+    "en": "Unsupported audio sample rate/channels: {0} Hz, {1} ch",
+    "zh": "不支持的音频采样率/声道数：{0} Hz，{1} ch",
+    "ja": "サポートされていない音声サンプルレート/チャンネル: {0} Hz、{1} ch"
+  },
+  {
+    "source": "지원하지 않는 오디오 샘플: {0} {1} bit",
+    "en": "Unsupported audio sample: {0} {1} bit",
+    "zh": "不支持的音频样本：{0} {1} bit",
+    "ja": "サポートされていない音声サンプル: {0} {1} bit"
+  },
+  {
+    "source": "오디오 전송 실패: {0}",
+    "en": "Audio send failed: {0}",
+    "zh": "音频发送失败：{0}",
+    "ja": "音声送信に失敗しました: {0}"
+  }
+]

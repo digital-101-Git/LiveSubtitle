@@ -1,0 +1,566 @@
+[
+  {
+    "source": "이 PC의 전사·번역 엔진을 확인합니다.",
+    "en": "Checking the transcription and translation engine on this PC.",
+    "zh": "正在检查此电脑上的转录与翻译引擎。",
+    "ja": "このPCの文字起こし・翻訳エンジンを確認しています。"
+  },
+  {
+    "source": "연결됨 · 준비 대기",
+    "en": "Connected · Ready",
+    "zh": "已连接 · 待命",
+    "ja": "接続済み · 待機中"
+  },
+  {
+    "source": "모델을 선택하고 ‘실시간 자막 시작’을 누르세요.",
+    "en": "Select a model and click ‘Start live captions’.",
+    "zh": "请选择模型，然后点击“开始实时字幕”。",
+    "ja": "モデルを選択し、「リアルタイム字幕を開始」を押してください。"
+  },
+  {
+    "source": "브라우저, 마이크 또는 시스템 전체 소리를 입력으로 선택할 수 있습니다. 번역은 항상 로컬입니다.",
+    "en": "Choose a browser, microphone, or all system audio as input. Translation always runs locally.",
+    "zh": "可选择浏览器、麦克风或系统全部音频作为输入。翻译始终在本地运行。",
+    "ja": "ブラウザー、マイク、またはシステム全体の音声を入力に選べます。翻訳は常にローカルで実行されます。"
+  },
+  {
+    "source": "엔진 연결 실패",
+    "en": "Engine connection failed",
+    "zh": "引擎连接失败",
+    "ja": "エンジン接続に失敗"
+  },
+  {
+    "source": "엔진에 API 키가 설정되어 있습니다. 변경할 때만 입력하세요.",
+    "en": "An API key is already set. Enter a key only to change it.",
+    "zh": "引擎已设置 API 密钥。仅在更改时输入。",
+    "ja": "エンジンにAPIキーが設定されています。変更する場合のみ入力してください。"
+  },
+  {
+    "source": "API 키를 입력하세요. 저장하지 않으면 이번 실행에서만 사용합니다.",
+    "en": "Enter an API key. Unless saved, it is used only for this run.",
+    "zh": "请输入 API 密钥。若不保存，仅在本次运行中使用。",
+    "ja": "APIキーを入力してください。保存しない場合、今回の起動中のみ使用します。"
+  },
+  {
+    "source": "모델 목록: 번역 {0}개 / 음성 인식 {1}개",
+    "en": "Models: {0} translation / {1} speech recognition",
+    "zh": "模型列表：翻译 {0} 个 / 语音识别 {1} 个",
+    "ja": "モデル一覧：翻訳 {0} 個 / 音声認識 {1} 個"
+  },
+  {
+    "source": "자동 감지",
+    "en": "Auto-detect",
+    "zh": "自动检测",
+    "ja": "自動検出"
+  },
+  {
+    "source": "입력 언어: {0}",
+    "en": "Input language: {0}",
+    "zh": "输入语言：{0}",
+    "ja": "入力言語：{0}"
+  },
+  {
+    "source": "입력 언어: {0} (지정)",
+    "en": "Input language: {0} (selected)",
+    "zh": "输入语言：{0}（指定）",
+    "ja": "入力言語：{0}（指定）"
+  },
+  {
+    "source": "번역 언어: {0}",
+    "en": "Translation language: {0}",
+    "zh": "翻译语言：{0}",
+    "ja": "翻訳言語：{0}"
+  },
+  {
+    "source": "모델 준비에는 시간이 걸릴 수 있습니다. 시작 전에 모델을 메모리에 불러옵니다.\n일본어→한국어 전용입니다. 입력: 일본어/자동 · 번역: 한국어",
+    "en": "Model preparation may take time. Models are loaded into memory before starting.\nJapanese → Korean only. Input: Japanese/Auto · Translation: Korean",
+    "zh": "准备模型可能需要一些时间。开始前将模型加载到内存。\n仅支持日语→韩语。输入：日语/自动 · 翻译：韩语",
+    "ja": "モデルの準備には時間がかかる場合があります。開始前にモデルをメモリーに読み込みます。\n日本語→韓国語専用です。入力：日本語/自動 · 翻訳：韓国語"
+  },
+  {
+    "source": "{0}를 입력 언어로 사용합니다. 변경하려면 자막을 중지한 뒤 다시 시작하세요.",
+    "en": "Using {0} as the input language. Stop and restart subtitles to change it.",
+    "zh": "使用{0}作为输入语言。如需更改，请停止字幕后重新开始。",
+    "ja": "入力言語に{0}を使用します。変更するには字幕を停止して再開してください。"
+  },
+  {
+    "source": "로컬 엔진이 연결되지 않았습니다.",
+    "en": "The local engine is not connected.",
+    "zh": "本地引擎未连接。",
+    "ja": "ローカルエンジンに接続されていません。"
+  },
+  {
+    "source": "API 키를 로컬 엔진에 전달했습니다.",
+    "en": "API key sent to the local engine.",
+    "zh": "已将 API 密钥传递给本地引擎。",
+    "ja": "APIキーをローカルエンジンに渡しました。"
+  },
+  {
+    "source": "음성 인식 옵션 저장됨",
+    "en": "Speech recognition options saved",
+    "zh": "语音识别选项已保存",
+    "ja": "音声認識オプションを保存しました"
+  },
+  {
+    "source": "다음 로컬 음성 인식 시작부터 적용됩니다.",
+    "en": "Changes apply the next time local speech recognition starts.",
+    "zh": "将在下次启动本地语音识别时生效。",
+    "ja": "次回のローカル音声認識の開始時から適用されます。"
+  },
+  {
+    "source": "음성 인식 옵션 저장 · {0} · 힌트 {1}개",
+    "en": "Speech options saved · {0} · {1} hints",
+    "zh": "语音识别选项已保存 · {0} · {1} 条提示",
+    "ja": "音声認識オプションを保存 · {0} · ヒント {1} 件"
+  },
+  {
+    "source": "음성 인식 옵션 저장 실패",
+    "en": "Failed to save speech options",
+    "zh": "语音识别选项保存失败",
+    "ja": "音声認識オプションの保存に失敗"
+  },
+  {
+    "source": "Whisper AlignAtt는 Whisper 모델 전용입니다. Qwen에서는 ‘기본’ 또는 ‘반복확인(느림)’을 선택하세요.",
+    "en": "Whisper AlignAtt requires a Whisper model. For Qwen, choose ‘Default’ or ‘Repeated confirmation (slow)’.",
+    "zh": "Whisper AlignAtt 仅适用于 Whisper 模型。Qwen 请使用“默认”或“重复确认（较慢）”。",
+    "ja": "Whisper AlignAttはWhisperモデル専用です。Qwenでは「標準」または「繰り返し確認（低速）」を選んでください。"
+  },
+  {
+    "source": "Whisper AlignAtt는 Whisper 전용입니다. 시작 전에 ‘기본’ 또는 ‘반복확인(느림)’을 선택하세요.",
+    "en": "Whisper AlignAtt requires Whisper. Choose ‘Default’ or ‘Repeated confirmation (slow)’ before starting.",
+    "zh": "Whisper AlignAtt 仅适用于 Whisper。开始前请选择“默认”或“重复确认（较慢）”。",
+    "ja": "Whisper AlignAttはWhisper専用です。開始前に「標準」または「繰り返し確認（低速）」を選んでください。"
+  },
+  {
+    "source": "기본 인식·표시 방식을 사용합니다. 문장 경계 재확인을 켜면 추가 대기가 생길 수 있습니다.",
+    "en": "Uses default recognition and display. Rechecking sentence boundaries may add a delay.",
+    "zh": "使用默认识别和显示方式。重新检查句子边界可能增加等待时间。",
+    "ja": "標準の認識・表示方式を使用します。文の境界の再確認を有効にすると、待ち時間が増える場合があります。"
+  },
+  {
+    "source": "실험 방식입니다. 음성과 텍스트의 정렬로 확정하며, 영상에 따라 인식 정확도가 낮아질 수 있습니다.",
+    "en": "Experimental: finalizes text using audio-text alignment. Accuracy may be lower for some videos.",
+    "zh": "实验方式：通过音频与文本对齐确定结果。某些视频的识别准确率可能降低。",
+    "ja": "実験的な方式です。音声とテキストの対応付けで確定します。動画によって認識精度が下がる場合があります。"
+  },
+  {
+    "source": "여러 차례의 인식 결과를 비교한 뒤 표시합니다. 기본보다 늦어질 수 있으며, 인식 오류가 남을 수 있습니다.",
+    "en": "Compares multiple recognition results before displaying them. It may be slower than default and still contain errors.",
+    "zh": "比较多次识别结果后显示。可能比默认方式更慢，仍可能存在识别错误。",
+    "ja": "複数回の認識結果を比較してから表示します。標準より遅くなる場合があり、認識エラーが残ることもあります。"
+  },
+  {
+    "source": "번역 GGUF 모델을 먼저 가져오세요.",
+    "en": "Import a GGUF translation model first.",
+    "zh": "请先导入 GGUF 翻译模型。",
+    "ja": "先にGGUF翻訳モデルを追加してください。"
+  },
+  {
+    "source": "로컬 음성 인식 모델을 선택하세요. 목록이 비어 있으면 models/asr 폴더에 지원 모델을 넣고 다시 연결하세요.",
+    "en": "Select a local speech recognition model. If the list is empty, put a supported model in models/asr and reconnect.",
+    "zh": "请选择本地语音识别模型。如果列表为空，请将支持的模型放入 models/asr 文件夹后重新连接。",
+    "ja": "ローカル音声認識モデルを選択してください。一覧が空の場合、models/asrフォルダーに対応モデルを置いて再接続してください。"
+  },
+  {
+    "source": "브라우저, 마이크 또는 시스템 전체 소리 중 오디오 소스를 선택하세요.",
+    "en": "Choose a browser, microphone, or all system audio as the audio source.",
+    "zh": "请选择浏览器、麦克风或系统全部音频作为音频源。",
+    "ja": "ブラウザー、マイク、またはシステム全体の音声を音声ソースに選んでください。"
+  },
+  {
+    "source": "선택한 브라우저 창이 닫혔습니다. 창 목록을 새로고침하세요.",
+    "en": "The selected browser window has closed. Refresh the window list.",
+    "zh": "所选浏览器窗口已关闭。请刷新窗口列表。",
+    "ja": "選択したブラウザーのウィンドウが閉じられました。一覧を更新してください。"
+  },
+  {
+    "source": "모델 준비 중",
+    "en": "Preparing models",
+    "zh": "正在准备模型",
+    "ja": "モデルを準備中"
+  },
+  {
+    "source": "모델을 불러오는 동안 잠시 기다려 주세요. 중지를 누르면 시작을 취소합니다.",
+    "en": "Please wait while models load. Click Stop to cancel startup.",
+    "zh": "正在加载模型，请稍候。点击停止可取消启动。",
+    "ja": "モデルの読み込みをお待ちください。「停止」を押すと開始をキャンセルします。"
+  },
+  {
+    "source": "오디오 연결 중",
+    "en": "Connecting audio",
+    "zh": "正在连接音频",
+    "ja": "音声に接続中"
+  },
+  {
+    "source": "전사 세션이 준비되면 선택한 오디오 소스의 캡처를 시작합니다.",
+    "en": "Audio capture starts when the transcription session is ready.",
+    "zh": "转录会话准备就绪后，将开始捕获所选音频源。",
+    "ja": "文字起こしセッションの準備ができると、選択した音声ソースのキャプチャーを開始します。"
+  },
+  {
+    "source": "마이크 입력을 듣고 있습니다…",
+    "en": "Listening to the microphone…",
+    "zh": "正在监听麦克风…",
+    "ja": "マイク音声を聞いています…"
+  },
+  {
+    "source": "방송 음성을 듣고 있습니다…",
+    "en": "Listening to the stream…",
+    "zh": "正在监听直播音频…",
+    "ja": "配信音声を聞いています…"
+  },
+  {
+    "source": "실시간 자막 실행 중",
+    "en": "Live subtitles running",
+    "zh": "实时字幕运行中",
+    "ja": "リアルタイム字幕を実行中"
+  },
+  {
+    "source": "음성 → Gemini · 번역 → 이 PC",
+    "en": "Audio → Gemini · Translation → this PC",
+    "zh": "音频 → Gemini · 翻译 → 此电脑",
+    "ja": "音声 → Gemini · 翻訳 → このPC"
+  },
+  {
+    "source": "음성 인식과 번역이 모두 이 PC에서 실행됩니다.",
+    "en": "Speech recognition and translation both run on this PC.",
+    "zh": "语音识别和翻译均在此电脑上运行。",
+    "ja": "音声認識と翻訳はどちらもこのPCで実行されます。"
+  },
+  {
+    "source": "자막 시작 · {0} · {1} · {2}",
+    "en": "Subtitles started · {0} · {1} · {2}",
+    "zh": "字幕已开始 · {0} · {1} · {2}",
+    "ja": "字幕を開始 · {0} · {1} · {2}"
+  },
+  {
+    "source": "자막 시작이 취소되었습니다.",
+    "en": "Subtitle startup was canceled.",
+    "zh": "字幕启动已取消。",
+    "ja": "字幕の開始をキャンセルしました。"
+  },
+  {
+    "source": "자막 시작 실패",
+    "en": "Failed to start subtitles",
+    "zh": "字幕启动失败",
+    "ja": "字幕の開始に失敗"
+  },
+  {
+    "source": "오류 · {0}",
+    "en": "Error · {0}",
+    "zh": "错误 · {0}",
+    "ja": "エラー · {0}"
+  },
+  {
+    "source": "자막 연결이 중단되었습니다",
+    "en": "Subtitle connection interrupted",
+    "zh": "字幕连接已中断",
+    "ja": "字幕接続が中断されました"
+  },
+  {
+    "source": "번역 경고 · {0}",
+    "en": "Translation warning · {0}",
+    "zh": "翻译警告 · {0}",
+    "ja": "翻訳の警告 · {0}"
+  },
+  {
+    "source": "오디오 중지: {0}",
+    "en": "Audio stop: {0}",
+    "zh": "音频停止：{0}",
+    "ja": "音声停止：{0}"
+  },
+  {
+    "source": "자막이 중지되었습니다. 최근 자막은 이 창에서 확인할 수 있습니다.",
+    "en": "Subtitles stopped. Recent captions remain in this window.",
+    "zh": "字幕已停止。可在此窗口查看最近的字幕。",
+    "ja": "字幕を停止しました。最近の字幕はこのウィンドウで確認できます。"
+  },
+  {
+    "source": "자막 중지됨",
+    "en": "Subtitles stopped",
+    "zh": "字幕已停止",
+    "ja": "字幕を停止しました"
+  },
+  {
+    "source": "모델과 방송을 선택해 다시 시작할 수 있습니다.",
+    "en": "Select a model and stream to start again.",
+    "zh": "选择模型和直播后即可重新开始。",
+    "ja": "モデルと配信を選んで再開できます。"
+  },
+  {
+    "source": "오디오 캡처와 자막 세션을 중지했습니다.",
+    "en": "Audio capture and subtitle session stopped.",
+    "zh": "已停止音频捕获和字幕会话。",
+    "ja": "音声キャプチャーと字幕セッションを停止しました。"
+  },
+  {
+    "source": "중지 처리: {0}",
+    "en": "Stopping: {0}",
+    "zh": "停止处理：{0}",
+    "ja": "停止処理：{0}"
+  },
+  {
+    "source": "전사·번역 모델을 메모리에 불러옵니다. 첫 실행은 오래 걸릴 수 있습니다.",
+    "en": "Loading transcription and translation models into memory. The first run may take longer.",
+    "zh": "正在将转录和翻译模型加载到内存。首次运行可能需要较长时间。",
+    "ja": "文字起こし・翻訳モデルをメモリーに読み込みます。初回は時間がかかる場合があります。"
+  },
+  {
+    "source": "모델 준비 완료",
+    "en": "Models ready",
+    "zh": "模型准备就绪",
+    "ja": "モデルの準備完了"
+  },
+  {
+    "source": "오디오 소스를 선택한 뒤 실시간 자막을 시작하세요.",
+    "en": "Choose an audio source, then start live subtitles.",
+    "zh": "请选择音频源，然后开始实时字幕。",
+    "ja": "音声ソースを選んでからリアルタイム字幕を開始してください。"
+  },
+  {
+    "source": "모델 준비가 완료되었습니다.",
+    "en": "Models are ready.",
+    "zh": "模型已准备就绪。",
+    "ja": "モデルの準備ができました。"
+  },
+  {
+    "source": "모델 준비 요청 대기를 취소했습니다. 이미 시작된 엔진의 모델 로딩은 완료될 수 있습니다.",
+    "en": "Stopped waiting for model preparation. Model loading already started by the engine may still finish.",
+    "zh": "已取消等待模型准备。引擎已开始的模型加载可能仍会完成。",
+    "ja": "モデル準備の待機をキャンセルしました。エンジンで開始済みの読み込みは完了する場合があります。"
+  },
+  {
+    "source": "모델 준비 실패",
+    "en": "Model preparation failed",
+    "zh": "模型准备失败",
+    "ja": "モデルの準備に失敗"
+  },
+  {
+    "source": "GGUF 모델 (*.gguf)|*.gguf",
+    "en": "GGUF model (*.gguf)|*.gguf",
+    "zh": "GGUF 模型 (*.gguf)|*.gguf",
+    "ja": "GGUFモデル (*.gguf)|*.gguf"
+  },
+  {
+    "source": "번역 모델 추가 중",
+    "en": "Adding translation model",
+    "zh": "正在添加翻译模型",
+    "ja": "翻訳モデルを追加中"
+  },
+  {
+    "source": "번역 모델 추가 완료",
+    "en": "Translation model added",
+    "zh": "翻译模型已添加",
+    "ja": "翻訳モデルを追加しました"
+  },
+  {
+    "source": "‘모델 준비’에서 선택한 모델을 불러올 수 있습니다.",
+    "en": "Click ‘Prepare models’ to load the selected model.",
+    "zh": "点击“准备模型”可加载所选模型。",
+    "ja": "「モデルを準備」で選択したモデルを読み込めます。"
+  },
+  {
+    "source": "번역 모델 추가 실패",
+    "en": "Failed to add translation model",
+    "zh": "翻译模型添加失败",
+    "ja": "翻訳モデルの追加に失敗"
+  },
+  {
+    "source": "선택한 모델을 준비하는 중… 중지 버튼으로 취소할 수 있습니다.",
+    "en": "Preparing the selected model… Click Stop to cancel.",
+    "zh": "正在准备所选模型…可点击停止按钮取消。",
+    "ja": "選択したモデルを準備中…「停止」でキャンセルできます。"
+  },
+  {
+    "source": "준비된 로컬 모델로 {0} 번역 중…",
+    "en": "Translating into {0} with the local model…",
+    "zh": "正在使用本地模型翻译为{0}…",
+    "ja": "ローカルモデルで{0}に翻訳中…"
+  },
+  {
+    "source": "엔진에서 번역 결과를 받지 못했습니다.",
+    "en": "No translation result was received from the engine.",
+    "zh": "未收到引擎返回的翻译结果。",
+    "ja": "エンジンから翻訳結果を受信できませんでした。"
+  },
+  {
+    "source": "수동 번역 테스트 완료 · {0}",
+    "en": "Manual translation test complete · {0}",
+    "zh": "手动翻译测试完成 · {0}",
+    "ja": "手動翻訳テスト完了 · {0}"
+  },
+  {
+    "source": "번역 테스트를 취소했습니다.",
+    "en": "Translation test canceled.",
+    "zh": "翻译测试已取消。",
+    "ja": "翻訳テストをキャンセルしました。"
+  },
+  {
+    "source": "번역 테스트 대기를 취소했습니다. 이미 시작된 엔진의 모델 로딩은 완료될 수 있습니다.",
+    "en": "Stopped waiting for the translation test. Model loading already started by the engine may still finish.",
+    "zh": "已取消等待翻译测试。引擎已开始的模型加载可能仍会完成。",
+    "ja": "翻訳テストの待機をキャンセルしました。エンジンで開始済みの読み込みは完了する場合があります。"
+  },
+  {
+    "source": "번역 테스트 실패: {0}",
+    "en": "Translation test failed: {0}",
+    "zh": "翻译测试失败：{0}",
+    "ja": "翻訳テストに失敗：{0}"
+  },
+  {
+    "source": "오디오 소스를 선택하세요. 브라우저나 마이크가 목록에 없다면 연결한 뒤 새로고침하세요.",
+    "en": "Select an audio source. If a browser or microphone is missing, connect it and refresh.",
+    "zh": "请选择音频源。如列表中没有浏览器或麦克风，请连接后刷新。",
+    "ja": "音声ソースを選択してください。ブラウザーやマイクが一覧にない場合は、接続して更新してください。"
+  },
+  {
+    "source": "선택한 마이크의 소리를 인식합니다. 자막은 모니터 위에 표시됩니다.",
+    "en": "Recognizes audio from the selected microphone. Subtitles appear on the monitor.",
+    "zh": "识别所选麦克风的声音。字幕将显示在屏幕上。",
+    "ja": "選択したマイクの音声を認識します。字幕はモニター上に表示されます。"
+  },
+  {
+    "source": "선택한 브라우저 프로세스의 소리를 캡처합니다. 같은 브라우저의 다른 탭 소리도 포함될 수 있습니다.",
+    "en": "Captures the selected browser process. Audio from other tabs in the same browser may be included.",
+    "zh": "捕获所选浏览器进程的音频。可能包含同一浏览器中其他标签页的声音。",
+    "ja": "選択したブラウザープロセスの音声をキャプチャーします。同じブラウザーの別のタブの音声も含まれる場合があります。"
+  },
+  {
+    "source": "시스템 전체 소리를 선택하면 알림과 다른 앱 소리도 함께 처리됩니다.",
+    "en": "All system audio includes notifications and sounds from other apps.",
+    "zh": "选择系统全部音频时，也会处理通知和其他应用的声音。",
+    "ja": "システム全体の音声を選ぶと、通知や他のアプリの音も処理されます。"
+  },
+  {
+    "source": "{0} 번역 · 항상 로컬",
+    "en": "{0} translation · Always local",
+    "zh": "{0}翻译 · 始终本地运行",
+    "ja": "{0}翻訳 · 常にローカル"
+  },
+  {
+    "source": "입력 음성이 Google로 전송됩니다. {0} 번역은 이 PC에서 처리됩니다.",
+    "en": "Input audio is sent to Google. Translation into {0} runs on this PC.",
+    "zh": "输入音频将发送给 Google。{0}翻译在此电脑上处理。",
+    "ja": "入力音声はGoogleに送信されます。{0}への翻訳はこのPCで処理されます。"
+  },
+  {
+    "source": "자막 위치·설정 저장 실패: {0}",
+    "en": "Failed to save subtitle position/settings: {0}",
+    "zh": "字幕位置及设置保存失败：{0}",
+    "ja": "字幕の位置・設定の保存に失敗：{0}"
+  },
+  {
+    "source": "자막 기본 위치·크기 복원: 모니터 가로 중앙 · 하단 95%",
+    "en": "Subtitle position/size reset: horizontally centered on monitor · 95% down",
+    "zh": "已恢复字幕默认位置及大小：屏幕水平居中 · 垂直位置 95%",
+    "ja": "字幕の位置・サイズを初期化：モニターの左右中央 · 上から95%"
+  },
+  {
+    "source": "자막 기본 위치·크기 복원: 브라우저 하단 중앙 · 브라우저를 표시할 수 없으면 모니터",
+    "en": "Subtitle position/size reset: bottom center of browser · monitor fallback",
+    "zh": "已恢复字幕默认位置及大小：浏览器底部居中 · 无法显示浏览器时使用屏幕",
+    "ja": "字幕の位置・サイズを初期化：ブラウザー下部中央 · 表示できない場合はモニター"
+  },
+  {
+    "source": "삭제 중…",
+    "en": "Deleting…",
+    "zh": "正在删除…",
+    "ja": "削除中…"
+  },
+  {
+    "source": "다음 음성을 기다리고 있습니다…",
+    "en": "Waiting for the next speech…",
+    "zh": "正在等待下一段语音…",
+    "ja": "次の音声を待っています…"
+  },
+  {
+    "source": "번역 기록이 없습니다. 자막을 시작하면 원문과 번역이 여기에 표시됩니다.",
+    "en": "No translation history. Start subtitles to see original text and translations here.",
+    "zh": "暂无翻译记录。开始字幕后，原文和翻译将显示在此处。",
+    "ja": "翻訳履歴はありません。字幕を開始すると原文と翻訳がここに表示されます。"
+  },
+  {
+    "source": "번역 기록 삭제 완료 · 로그 파일 {0}개 삭제",
+    "en": "Translation history cleared · {0} log files deleted",
+    "zh": "翻译记录已清除 · 已删除 {0} 个日志文件",
+    "ja": "翻訳履歴を削除 · ログファイル {0} 件を削除"
+  },
+  {
+    "source": " · 실시간 자막은 계속 실행됩니다.",
+    "en": " · Live subtitles keep running.",
+    "zh": " · 实时字幕将继续运行。",
+    "ja": " · リアルタイム字幕は継続します。"
+  },
+  {
+    "source": "삭제하지 못한 파일 {0}개: {1}",
+    "en": "{0} files could not be deleted: {1}",
+    "zh": "有 {0} 个文件无法删除：{1}",
+    "ja": "削除できなかったファイル {0} 件：{1}"
+  },
+  {
+    "source": "전체 삭제 완료를 확인하지 못했습니다.",
+    "en": "Could not confirm that all files were deleted.",
+    "zh": "无法确认是否已全部删除。",
+    "ja": "すべて削除できたことを確認できませんでした。"
+  },
+  {
+    "source": "번역 기록 삭제 미완료 · 로그 파일 {0}개 삭제 · {1}",
+    "en": "Translation history only partly cleared · {0} log files deleted · {1}",
+    "zh": "翻译记录未完全清除 · 已删除 {0} 个日志文件 · {1}",
+    "ja": "翻訳履歴の削除が未完了 · ログファイル {0} 件を削除 · {1}"
+  },
+  {
+    "source": "번역 기록 삭제 요청이 취소되었습니다. 삭제 결과를 확인하지 못했습니다.",
+    "en": "The history deletion request was canceled. The result could not be confirmed.",
+    "zh": "翻译记录删除请求已取消。无法确认删除结果。",
+    "ja": "翻訳履歴の削除要求をキャンセルしました。削除結果を確認できませんでした。"
+  },
+  {
+    "source": "번역 기록 삭제 실패 · {0}",
+    "en": "Failed to clear translation history · {0}",
+    "zh": "翻译记录删除失败 · {0}",
+    "ja": "翻訳履歴の削除に失敗 · {0}"
+  },
+  {
+    "source": "엔진의 기록 삭제 결과를 확인할 수 없습니다.",
+    "en": "Could not verify the engine's history deletion result.",
+    "zh": "无法确认引擎的记录删除结果。",
+    "ja": "エンジンの履歴削除結果を確認できません。"
+  },
+  {
+    "source": "LiveSubtitle 열기",
+    "en": "Open LiveSubtitle",
+    "zh": "打开 LiveSubtitle",
+    "ja": "LiveSubtitleを開く"
+  },
+  {
+    "source": "자막 중지",
+    "en": "Stop subtitles",
+    "zh": "停止字幕",
+    "ja": "字幕を停止"
+  },
+  {
+    "source": "트레이에서 계속 실행됩니다. 트레이 아이콘을 더블클릭하면 다시 열립니다.",
+    "en": "Still running in the system tray. Double-click its icon to reopen.",
+    "zh": "程序将继续在系统托盘中运行。双击托盘图标可重新打开。",
+    "ja": "トレイで実行を続けます。トレイアイコンをダブルクリックすると再表示します。"
+  },
+  {
+    "source": "다음 발화를 기다리고 있습니다…",
+    "en": "Waiting for the next utterance…",
+    "zh": "正在等待下一句…",
+    "ja": "次の発話を待っています…"
+  },
+  {
+    "source": "로컬 음성 인식과 번역 모델이 준비되었습니다.",
+    "en": "Local speech recognition and translation models are ready.",
+    "zh": "本地语音识别和翻译模型已准备就绪。",
+    "ja": "ローカル音声認識・翻訳モデルの準備ができました。"
+  },
+  {
+    "source": "[번역하지 못했습니다]",
+    "en": "[Translation failed]",
+    "zh": "[翻译失败]",
+    "ja": "[翻訳できませんでした]"
+  }
+]

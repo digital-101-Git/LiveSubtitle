@@ -1,0 +1,362 @@
+[
+  {
+    "source": "허용되지 않은 브라우저 출처입니다.",
+    "en": "This browser origin is not allowed.",
+    "zh": "不允许此浏览器来源。",
+    "ja": "このブラウザの接続元は許可されていません。"
+  },
+  {
+    "source": "엔진 인증이 필요합니다.",
+    "en": "Engine authentication is required.",
+    "zh": "需要引擎身份验证。",
+    "ja": "エンジンの認証が必要です。"
+  },
+  {
+    "source": "자막을 중지한 다음 설정이나 모델을 변경해 주세요.",
+    "en": "Stop subtitles before changing settings or models.",
+    "zh": "请先停止字幕，再更改设置或模型。",
+    "ja": "字幕を停止してから設定やモデルを変更してください。"
+  },
+  {
+    "source": "모델 가져오기는 Windows 앱에서 실행해 주세요.",
+    "en": "Import models from the Windows app.",
+    "zh": "请在 Windows 应用中导入模型。",
+    "ja": "モデルのインポートは Windows アプリで実行してください。"
+  },
+  {
+    "source": "파일을 가져올 수 없습니다. 파일 경로와 디스크 여유 공간을 확인해 주세요.",
+    "en": "Cannot import the file. Check its path and available disk space.",
+    "zh": "无法导入文件。请检查文件路径和磁盘可用空间。",
+    "ja": "ファイルをインポートできません。ファイルのパスとディスクの空き容量を確認してください。"
+  },
+  {
+    "source": "번역할 문장을 입력해 주세요.",
+    "en": "Enter a sentence to translate.",
+    "zh": "请输入要翻译的句子。",
+    "ja": "翻訳する文を入力してください。"
+  },
+  {
+    "source": "번역 기록 삭제는 Windows 앱에서 실행해 주세요.",
+    "en": "Delete translation history from the Windows app.",
+    "zh": "请在 Windows 应用中删除翻译记录。",
+    "ja": "翻訳履歴の削除は Windows アプリで実行してください。"
+  },
+  {
+    "source": "오디오 전송 전에 자막 세션을 시작해 주세요.",
+    "en": "Start a subtitle session before sending audio.",
+    "zh": "请先启动字幕会话，再发送音频。",
+    "ja": "音声を送信する前に字幕セッションを開始してください。"
+  },
+  {
+    "source": "제어 메시지가 너무 큽니다.",
+    "en": "The control message is too large.",
+    "zh": "控制消息过大。",
+    "ja": "制御メッセージが大きすぎます。"
+  },
+  {
+    "source": "올바른 JSON 제어 메시지가 필요합니다.",
+    "en": "A valid JSON control message is required.",
+    "zh": "需要有效的 JSON 控制消息。",
+    "ja": "有効な JSON 制御メッセージが必要です。"
+  },
+  {
+    "source": "제어 메시지는 JSON 객체여야 합니다.",
+    "en": "The control message must be a JSON object.",
+    "zh": "控制消息必须是 JSON 对象。",
+    "ja": "制御メッセージは JSON オブジェクトである必要があります。"
+  },
+  {
+    "source": "이미 시작된 세션입니다.",
+    "en": "This session has already started.",
+    "zh": "此会话已启动。",
+    "ja": "このセッションはすでに開始されています。"
+  },
+  {
+    "source": "음성 인식 모드나 언어가 올바르지 않습니다.",
+    "en": "The speech recognition mode or language is invalid.",
+    "zh": "语音识别模式或语言无效。",
+    "ja": "音声認識モードまたは言語が無効です。"
+  },
+  {
+    "source": "지원하지 않는 제어 메시지입니다.",
+    "en": "This control message is not supported.",
+    "zh": "不支持此控制消息。",
+    "ja": "この制御メッセージはサポートされていません。"
+  },
+  {
+    "source": "엔진 오류가 발생했습니다. 자막을 다시 시작해 주세요.",
+    "en": "An engine error occurred. Restart subtitles.",
+    "zh": "发生引擎错误。请重新启动字幕。",
+    "ja": "エンジンエラーが発生しました。字幕を再開してください。"
+  },
+  {
+    "source": "긴 음성 구간을 현재 인식 결과로 확정하고 다음 음성을 계속 처리합니다.",
+    "en": "Finalized a long speech segment using the current recognition result. Continuing with the next audio.",
+    "zh": "已使用当前识别结果确认较长的语音片段，将继续处理后续语音。",
+    "ja": "長い音声区間を現在の認識結果で確定しました。次の音声の処理を続けます。"
+  },
+  {
+    "source": "이 음성 구간의 인식 결과가 비어 있습니다. 다음 음성을 계속 처리합니다.",
+    "en": "No speech was recognized in this segment. Continuing with the next audio.",
+    "zh": "此语音片段的识别结果为空，将继续处理后续语音。",
+    "ja": "この音声区間の認識結果は空です。次の音声の処理を続けます。"
+  },
+  {
+    "source": "뒤 음성과 비교하면서 인식 내용을 정정했습니다. 다음 음성 인식을 계속합니다.",
+    "en": "Corrected the transcript using later audio. Continuing speech recognition.",
+    "zh": "已结合后续语音修正识别内容，将继续识别后续语音。",
+    "ja": "後続の音声と比較して認識内容を修正しました。次の音声認識を続けます。"
+  },
+  {
+    "source": "Whisper AlignAtt 처리가 음성 속도를 따라가지 못해 중지했습니다.",
+    "en": "Stopped because Whisper AlignAtt processing could not keep up with the audio.",
+    "zh": "Whisper AlignAtt 的处理速度无法跟上语音，已停止。",
+    "ja": "Whisper AlignAtt の処理が音声に追いつかないため停止しました。"
+  },
+  {
+    "source": "최종 음성 인식 결과가 비어 이전 잠정 문구를 표시하지 않았습니다. 다음 음성을 계속 처리합니다.",
+    "en": "The final transcript was empty, so the earlier provisional text was removed. Continuing with the next audio.",
+    "zh": "最终语音识别结果为空，未显示先前的临时文本，将继续处理后续语音。",
+    "ja": "最終認識結果が空のため、以前の暫定テキストを表示しませんでした。次の音声の処理を続けます。"
+  },
+  {
+    "source": "번역 로그 파일을 저장하지 못했습니다. 자막은 계속 표시됩니다.",
+    "en": "Could not save the translation log file. Subtitles will continue to appear.",
+    "zh": "无法保存翻译日志文件，字幕将继续显示。",
+    "ja": "翻訳ログファイルを保存できませんでした。字幕の表示は続きます。"
+  },
+  {
+    "source": "다른 창이나 브라우저에서 이미 자막을 처리 중입니다.",
+    "en": "Subtitles are already being processed in another window or browser.",
+    "zh": "其他窗口或浏览器正在处理字幕。",
+    "ja": "別のウィンドウまたはブラウザですでに字幕を処理しています。"
+  },
+  {
+    "source": "음성 인식·번역 모델을 준비하고 있습니다.",
+    "en": "Preparing speech recognition and translation models.",
+    "zh": "正在准备语音识别和翻译模型。",
+    "ja": "音声認識・翻訳モデルを準備しています。"
+  },
+  {
+    "source": "음성 처리 연결에 문제가 발생했습니다. 다시 시작해 주세요.",
+    "en": "There was a problem with the audio processing connection. Restart subtitles.",
+    "zh": "语音处理连接出现问题，请重新开始。",
+    "ja": "音声処理の接続に問題が発生しました。再開してください。"
+  },
+  {
+    "source": "자막 세션이 중지되어 있습니다.",
+    "en": "The subtitle session is stopped.",
+    "zh": "字幕会话已停止。",
+    "ja": "字幕セッションは停止しています。"
+  },
+  {
+    "source": "오디오는 16kHz mono PCM16LE, 메시지당 최대 1초여야 합니다.",
+    "en": "Audio must be 16 kHz mono PCM16LE, with at most 1 second per message.",
+    "zh": "音频必须为 16 kHz 单声道 PCM16LE，每条消息最多 1 秒。",
+    "ja": "音声は 16 kHz モノラル PCM16LE 形式で、メッセージあたり最大 1 秒にする必要があります。"
+  },
+  {
+    "source": "오디오 대기 버퍼가 가득 차 중지했습니다. 다른 GPU 작업을 줄이고 다시 시작해 주세요.",
+    "en": "Stopped because the audio buffer is full. Reduce other GPU workloads and restart.",
+    "zh": "音频缓冲区已满，已停止。请减少其他 GPU 任务后重新开始。",
+    "ja": "音声バッファがいっぱいになったため停止しました。他の GPU 処理を減らして再開してください。"
+  },
+  {
+    "source": "음성 구간이 너무 깁니다. 자막을 다시 시작해 주세요.",
+    "en": "The speech segment is too long. Restart subtitles.",
+    "zh": "语音片段过长，请重新启动字幕。",
+    "ja": "音声区間が長すぎます。字幕を再開してください。"
+  },
+  {
+    "source": "번역 처리가 밀려 중지했습니다. 다른 GPU 작업을 줄이거나 더 작은 번역 모델을 선택해 주세요.",
+    "en": "Stopped because translation processing fell behind. Reduce other GPU workloads or select a smaller translation model.",
+    "zh": "翻译处理积压，已停止。请减少其他 GPU 任务或选择更小的翻译模型。",
+    "ja": "翻訳処理が追いつかないため停止しました。他の GPU 処理を減らすか、より小さな翻訳モデルを選択してください。"
+  },
+  {
+    "source": "한 문장의 번역을 완료하지 못했습니다. 원문은 최근 자막에 남기고 다음 문장을 계속 처리합니다.",
+    "en": "Could not complete one sentence's translation. Its original text remains in recent captions; processing will continue with the next sentence.",
+    "zh": "未能完成一个句子的翻译，原文将保留在最近字幕中，并继续处理后续句子。",
+    "ja": "1 文の翻訳を完了できませんでした。原文は最近の字幕に残し、次の文の処理を続けます。"
+  },
+  {
+    "source": "문장 재확인 결과가 비어 이전 인식을 사용하고 추가 음성은 다음 구간에서 다시 처리합니다.",
+    "en": "The recheck returned no text. Using the earlier transcript and reprocessing the additional audio in the next segment.",
+    "zh": "句子复核结果为空，将使用先前的识别结果，并在下一个片段中重新处理新增语音。",
+    "ja": "文の再確認結果が空のため、以前の認識結果を使用します。追加の音声は次の区間で再処理します。"
+  },
+  {
+    "source": "뒤 음성과 함께 재확인하면서 원문 인식이 크게 달라졌습니다.",
+    "en": "Rechecking with later audio significantly changed the transcript.",
+    "zh": "结合后续语音复核后，原文识别结果发生较大变化。",
+    "ja": "後続の音声とともに再確認した結果、原文の認識内容が大きく変わりました。"
+  },
+  {
+    "source": "음성 인식이 지연된 구간은 마지막 인식 결과로 처리하고 계속 진행합니다.",
+    "en": "Using the latest recognition result for a delayed segment and continuing.",
+    "zh": "语音识别延迟的片段将使用最后的识别结果处理，并继续运行。",
+    "ja": "音声認識が遅延した区間は最後の認識結果で処理し、続行します。"
+  },
+  {
+    "source": "추가 오디오 구간에서 대사를 인식하지 못했습니다. 다음 음성을 계속 처리합니다.",
+    "en": "No speech was recognized in the additional audio. Continuing with the next audio.",
+    "zh": "未能在新增音频片段中识别出对白，将继续处理后续语音。",
+    "ja": "追加の音声区間では発話を認識できませんでした。次の音声の処理を続けます。"
+  },
+  {
+    "source": "이전 잠정 인식이 최신 결과에서 확인되지 않아 정정했습니다. 다음 음성 인식을 계속합니다.",
+    "en": "Corrected earlier provisional text that was not confirmed by the latest result. Continuing speech recognition.",
+    "zh": "最新结果未确认先前的临时识别内容，已进行修正，将继续识别后续语音。",
+    "ja": "最新の結果で確認できなかった以前の暫定認識を修正しました。次の音声認識を続けます。"
+  },
+  {
+    "source": "Gemini 연결 실패: API 키, 모델 사용 권한, 네트워크를 확인해 주세요.",
+    "en": "Gemini connection failed. Check the API key, model permissions, and network.",
+    "zh": "Gemini 连接失败。请检查 API 密钥、模型使用权限和网络。",
+    "ja": "Gemini に接続できませんでした。API キー、モデルの使用権限、ネットワークを確認してください。"
+  },
+  {
+    "source": "Gemini 연결이 종료되었습니다. 자막을 다시 시작해 주세요.",
+    "en": "The Gemini connection closed. Restart subtitles.",
+    "zh": "Gemini 连接已关闭，请重新启动字幕。",
+    "ja": "Gemini との接続が終了しました。字幕を再開してください。"
+  },
+  {
+    "source": "Gemini가 처리를 거부했습니다. 사용량 제한과 모델 권한을 확인해 주세요.",
+    "en": "Gemini rejected the request. Check usage limits and model permissions.",
+    "zh": "Gemini 拒绝了处理请求。请检查用量限制和模型权限。",
+    "ja": "Gemini が処理を拒否しました。使用量の制限とモデルの権限を確認してください。"
+  },
+  {
+    "source": "Gemini 세션 시간이 만료됩니다. 자막을 다시 시작해 주세요.",
+    "en": "The Gemini session is expiring. Restart subtitles.",
+    "zh": "Gemini 会话即将到期，请重新启动字幕。",
+    "ja": "Gemini セッションの有効期限が切れます。字幕を再開してください。"
+  },
+  {
+    "source": "지원하지 않는 음성 인식 방식입니다.",
+    "en": "This speech recognition method is not supported.",
+    "zh": "不支持此语音识别方式。",
+    "ja": "この音声認識方式はサポートされていません。"
+  },
+  {
+    "source": "음성 인식 힌트는 최대 32개, 항목당 48자, 전체 512자의 원문 단어 목록이어야 합니다.",
+    "en": "Speech recognition hints must be original-language words: up to 32 entries, 48 characters each, and 512 characters in total.",
+    "zh": "语音识别提示必须是原语言词语列表：最多 32 项，每项最多 48 个字符，总计最多 512 个字符。",
+    "ja": "音声認識のヒントは原文言語の単語一覧にしてください。最大 32 項目、各 48 文字、合計 512 文字です。"
+  },
+  {
+    "source": "JA-KO-VN 모델은 일본어→한국어 전용입니다. 입력 언어를 일본어 또는 자동, 번역 언어를 한국어로 선택하세요.",
+    "en": "JA-KO-VN only supports Japanese-to-Korean translation. Set input language to Japanese or Auto and translation language to Korean.",
+    "zh": "JA-KO-VN 仅支持日语→韩语。请将输入语言设为日语或自动，将翻译语言设为韩语。",
+    "ja": "JA-KO-VN は日本語→韓国語専用です。入力言語を日本語または自動、翻訳言語を韓国語に設定してください。"
+  },
+  {
+    "source": "AlignAtt 방식은 Whisper 모델에서만 사용할 수 있습니다.",
+    "en": "AlignAtt is only available with Whisper models.",
+    "zh": "AlignAtt 仅适用于 Whisper 模型。",
+    "ja": "AlignAtt 方式は Whisper モデルでのみ使用できます。"
+  },
+  {
+    "source": "모델 준비 중 오류가 발생했습니다. 설치와 로그를 확인해 주세요.",
+    "en": "An error occurred while preparing models. Check the installation and logs.",
+    "zh": "准备模型时发生错误，请检查安装和日志。",
+    "ja": "モデルの準備中にエラーが発生しました。インストール状態とログを確認してください。"
+  },
+  {
+    "source": "llama-server 실행 파일이 설치되지 않았습니다.",
+    "en": "The llama-server executable is not installed.",
+    "zh": "尚未安装 llama-server 可执行文件。",
+    "ja": "llama-server の実行ファイルがインストールされていません。"
+  },
+  {
+    "source": "번역 엔진 실행에 실패했습니다. logs/llama.log를 확인해 주세요.",
+    "en": "Could not start the translation engine. Check logs/llama.log.",
+    "zh": "翻译引擎启动失败，请检查 logs/llama.log。",
+    "ja": "翻訳エンジンの起動に失敗しました。logs/llama.log を確認してください。"
+  },
+  {
+    "source": "번역 모델 준비 시간이 초과되었습니다.",
+    "en": "Translation model preparation timed out.",
+    "zh": "翻译模型准备超时。",
+    "ja": "翻訳モデルの準備がタイムアウトしました。"
+  },
+  {
+    "source": "faster-whisper 또는 CUDA 런타임이 설치되지 않았습니다.",
+    "en": "faster-whisper or the CUDA runtime is not installed.",
+    "zh": "尚未安装 faster-whisper 或 CUDA 运行时。",
+    "ja": "faster-whisper または CUDA ランタイムがインストールされていません。"
+  },
+  {
+    "source": "Whisper GPU 로딩 실패: CUDA/cuDNN 설치와 GPU 여유 메모리를 확인해 주세요.",
+    "en": "Whisper GPU loading failed. Check the CUDA/cuDNN installation and available GPU memory.",
+    "zh": "Whisper GPU 加载失败。请检查 CUDA/cuDNN 安装和 GPU 可用显存。",
+    "ja": "Whisper の GPU 読み込みに失敗しました。CUDA/cuDNN のインストール状態と GPU の空きメモリを確認してください。"
+  },
+  {
+    "source": "음성 인식 모델이 준비되지 않았습니다.",
+    "en": "The speech recognition model is not ready.",
+    "zh": "语音识别模型尚未就绪。",
+    "ja": "音声認識モデルの準備ができていません。"
+  },
+  {
+    "source": "음성 인식 모델의 준비 추론에 실패했습니다. GPU 상태와 로그를 확인해 주세요.",
+    "en": "The speech recognition model's warmup inference failed. Check GPU status and logs.",
+    "zh": "语音识别模型的预热推理失败，请检查 GPU 状态和日志。",
+    "ja": "音声認識モデルのウォームアップ推論に失敗しました。GPU の状態とログを確認してください。"
+  },
+  {
+    "source": "음성 인식 처리에 실패했습니다. GPU 상태와 런타임을 확인해 주세요.",
+    "en": "Speech recognition failed. Check GPU status and the runtime.",
+    "zh": "语音识别处理失败，请检查 GPU 状态和运行时。",
+    "ja": "音声認識処理に失敗しました。GPU の状態とランタイムを確認してください。"
+  },
+  {
+    "source": "번역 모델을 먼저 준비해 주세요.",
+    "en": "Prepare the translation model first.",
+    "zh": "请先准备翻译模型。",
+    "ja": "先に翻訳モデルを準備してください。"
+  },
+  {
+    "source": "JA-KO-VN 모델은 일본어→한국어 번역만 지원합니다. 다른 언어는 HY-MT2 등 다국어 번역 모델을 선택하세요.",
+    "en": "JA-KO-VN only supports Japanese-to-Korean translation. For other languages, choose a multilingual model such as HY-MT2.",
+    "zh": "JA-KO-VN 仅支持日语→韩语翻译。其他语言请选择 HY-MT2 等多语言翻译模型。",
+    "ja": "JA-KO-VN は日本語→韓国語の翻訳のみ対応しています。他の言語には HY-MT2 などの多言語翻訳モデルを選択してください。"
+  },
+  {
+    "source": "번역이 출력 길이 제한에 도달했습니다. 문장을 짧게 나누어 다시 시도해 주세요.",
+    "en": "The translation reached the output length limit. Split the sentence into shorter parts and try again.",
+    "zh": "翻译已达到输出长度上限，请将句子拆短后重试。",
+    "ja": "翻訳が出力文字数の上限に達しました。文を短く分けて再試行してください。"
+  },
+  {
+    "source": "번역 결과를 받지 못했습니다. 번역 엔진 로그를 확인해 주세요.",
+    "en": "No translation result was received. Check the translation engine log.",
+    "zh": "未收到翻译结果，请检查翻译引擎日志。",
+    "ja": "翻訳結果を取得できませんでした。翻訳エンジンのログを確認してください。"
+  },
+  {
+    "source": "음성 인식 모델 파일이 불완전하거나 지원하지 않는 형식입니다. 모델 설치를 확인해 주세요.",
+    "en": "The speech recognition model files are incomplete or use an unsupported format. Check the model installation.",
+    "zh": "语音识别模型文件不完整或格式不受支持，请检查模型安装。",
+    "ja": "音声認識モデルのファイルが不完全か、未対応の形式です。モデルのインストール状態を確認してください。"
+  },
+  {
+    "source": "가져올 파일의 절대 경로가 필요합니다.",
+    "en": "An absolute path is required for the file to import.",
+    "zh": "需要提供要导入文件的绝对路径。",
+    "ja": "インポートするファイルの絶対パスが必要です。"
+  },
+  {
+    "source": "모델 폴더가 앱 폴더 밖으로 연결되어 있습니다.",
+    "en": "The model folder points outside the app folder.",
+    "zh": "模型文件夹指向应用文件夹之外的位置。",
+    "ja": "モデルフォルダーがアプリフォルダー外を参照しています。"
+  },
+  {
+    "source": "같은 이름의 모델이 이미 있습니다. 덮어쓰지 않았습니다.",
+    "en": "A model with the same name already exists. It was not overwritten.",
+    "zh": "已存在同名模型，未进行覆盖。",
+    "ja": "同じ名前のモデルがすでにあります。上書きはしていません。"
+  }
+]

@@ -1,0 +1,5 @@
+# Normalize our text sources; preserve upstream files and their recorded hashes.
+* text=auto
+engine/_vendor/** -text
+models/** -text
+*.npz binary

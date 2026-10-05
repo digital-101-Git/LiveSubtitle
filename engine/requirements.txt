@@ -1,0 +1,18 @@
+# Tested on bundled Windows x64 CPython 3.12.10, RTX 4080.
+--extra-index-url https://download.pytorch.org/whl/cu128
+fastapi==0.142.2
+uvicorn==0.54.0
+httpx==0.28.1
+websockets==17.2
+numpy==2.5.3
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+numba==0.68.0
+tiktoken==0.14.0
+onnxruntime==1.30.0
+torch==2.11.0+cu128; sys_platform == "win32"
+transformers==5.18.0
+soundfile==0.13.1
+nvidia-cudnn-cu12==9.27.0.42; sys_platform == "win32"
+nvidia-cublas-cu12==12.9.2.10; sys_platform == "win32"
+nvidia-cuda-runtime-cu12==12.9.79; sys_platform == "win32"

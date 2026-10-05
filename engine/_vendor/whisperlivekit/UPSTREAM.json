@@ -1,0 +1,257 @@
+{
+  "repository": "https://github.com/QuentinFuxa/WhisperLiveKit",
+  "commit": "363e4f6d029694d9c81ae548beddd9d3c88a3637",
+  "license": "Apache-2.0; embedded OpenAI Whisper code MIT",
+  "openai_license_source": "https://raw.githubusercontent.com/openai/whisper/main/LICENSE",
+  "scope": "PyTorch AlignAtt decoder, CT2 encoder bridge, Whisper tokenizer/timing only. No server, UI, translation or model weights.",
+  "modifications": [
+    "Absolute whisperlivekit imports namespaced to engine._vendor.whisperlivekit.",
+    "Package init modules reduced to avoid unrelated backends and automatic downloads.",
+    "Behavior corrections reside in engine/asr_alignatt.py subclass, not upstream source.",
+    "Vendoring also changed source line endings/spacing; original and vendored hashes are recorded per file.",
+    "2026-10-05: digital-101 added per-file modification notices and inherited license copies; Python AST unchanged by this notice update.",
+    "Replaced package __init__.py files are now included in the source manifest."
+  ],
+  "files": [
+    {
+      "source": "backend_support.py",
+      "original_sha256": "8cd39ffca35d50361ca61c6a283662cb569f18b2625a5aeda74c6062af941919",
+      "vendored_sha256": "1cb79080484a04320369b40ee0f886e77d6b9524454490e19c3c5dc2f39d2980",
+      "vendored_sha256_before_license_notice": "2e3822d89248327c477de8604a56eac057bf1eaffb1bbee61450f81f5fbd5f82",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "timed_objects.py",
+      "original_sha256": "4458bb9254ac1a317ca20a5b8b932abc46aa34ec03b53204afc961b689adf0d0",
+      "vendored_sha256": "35dc1e554556140b63c97c4bfbe77eccbba30a126cb896bafdfc2d181caf6d45",
+      "vendored_sha256_before_license_notice": "f3c388007a1f07c614c55b8a0489e0830a883a41b644cf09a233c11407c1ca5b",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/align_att_base.py",
+      "original_sha256": "e50fd9553320c6537c07eae2ec14ed1ec45caaf9d60d18c075568b7ec5d86c95",
+      "vendored_sha256": "dfe63f5e9fa1f2a1c916618f4ea688dbd582bd8a888d6b35e705d140ea1025f9",
+      "vendored_sha256_before_license_notice": "db207794dab6bc5b61b7ef9f662908bdab8a0753afe8b54b277a2a56eaccc538",
+      "local_changes": "namespaced imports and source formatting",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/beam.py",
+      "original_sha256": "7b777cbe42b4a4bbce4f71c429765e05b4d281adfdcb3d38d206cacf50712984",
+      "vendored_sha256": "62d3bc7908a6cd3d2409e53d4b55580fbadc84e25266267e5aad1ae6a852cf6c",
+      "vendored_sha256_before_license_notice": "8420f28e197e1674f5cbef854b92241fc6fafe7e46e289acc42c30b9bf42b463",
+      "local_changes": "namespaced imports and source formatting",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/config.py",
+      "original_sha256": "7cd5959f5aefecbda06a3bbad0a0f53f4be1e735f868673ff60672a2d5c5b487",
+      "vendored_sha256": "5a4a19bb45c6e3def1d908c7026a3d4b874e0c2513ff7929ddc7f66b9888675e",
+      "vendored_sha256_before_license_notice": "9b26826d439490d64e310d9fd0353194f3d0d7b07312535ccb6da73719ae04d6",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/decoder_state.py",
+      "original_sha256": "71082723825c066a81b8b33d8d41bcbfe35043fdd96de0b12f5ffe48b7e23a1e",
+      "vendored_sha256": "eb262d75c1bb758f477ce4ea7f9dae6702812ed973074d4cd251f932c95df6e2",
+      "vendored_sha256_before_license_notice": "ea51707f2e975f1df58e3a6c6ce54072e325c144d9a83df484bf387ccd42efd2",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/eow_detection.py",
+      "original_sha256": "27b55e0bdd7140ad7215b099c7e9212ef8d267232e74db9895589be402d88c3d",
+      "vendored_sha256": "135300d3254d114802c58f7acb1e9cab865815899945274be8e9c0a2cf5a90bb",
+      "vendored_sha256_before_license_notice": "82c45ab5b1a57e21572edfa08e4bcfae0d4632b8dee51d346b078f105378f517",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/simul_whisper.py",
+      "original_sha256": "a87ac14f162563bb58560f5d5271244e0482720518d0139e26a62b2f4df6c5c2",
+      "vendored_sha256": "7495cc742228dd79ad5e4588dc05408ec50f0e16e933ba6d36e5de6bd0a81f07",
+      "vendored_sha256_before_license_notice": "09f553def9ee5b525a1d9425abf370d988a6856215dba75266af63ce1a46fa26",
+      "local_changes": "namespaced imports and source formatting",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/token_buffer.py",
+      "original_sha256": "a61a9413529cadbfcb35f986f6a120a220e488b49e0500789de651abd53e58a9",
+      "vendored_sha256": "9b1fc3ad301da5100760598c7f2e8ba964fa895e9462b1d249ec827076820d63",
+      "vendored_sha256_before_license_notice": "e9d45711890c2cc054b00b3b0b698577a8bfe48c94808597003252680db8c520",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/audio.py",
+      "original_sha256": "e45cae1513843fa333e62d01ef541d304cc735794db4c244d1c6f66049dd4b33",
+      "vendored_sha256": "2ddb067e6ed571d100f2ae4103f36876af67ae22ef1e68c54a1101f13c058870",
+      "vendored_sha256_before_license_notice": "84624682cb986f1d60c5c2b5266ec717c9dd6800c7a1c8c90b97b9f55d59d3b5",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/decoding.py",
+      "original_sha256": "b989b0e766f4730cd2f434411ae9d65fb67ce90f0e71e26cabc66c982a247be0",
+      "vendored_sha256": "dbd32202b69bd56eda60ee7169a26582c3a3df61ee239cfb55696ee8f68ed2d3",
+      "vendored_sha256_before_license_notice": "46550e8f3aff86c81f30d1f79167f41186064e7bf570a194006945997b0988cc",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/model.py",
+      "original_sha256": "c7cd509f3462552699322609c0a214c874c48367c49c71d3632dc04e856525f7",
+      "vendored_sha256": "da6b94e283b93b2eaeb654abb2b8db7dd3c24c92b0487e73e4628db6f10d52b0",
+      "vendored_sha256_before_license_notice": "8cc5b59b64defede259e7fada017525fd2dafef091ae3a33122110277a7d1596",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/timing.py",
+      "original_sha256": "a4c7f319266182a90bb4cee7f39e5fa819bda62e29153387845ecbcc6921e70b",
+      "vendored_sha256": "6419a44ae15f22be4ecebd342933245ed39f413d237531ab720fccb67d0defd6",
+      "vendored_sha256_before_license_notice": "bf49330578d936a4687883cd0eb5c2235ebc77b0d8aa7ab92540e0f173dabc79",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/tokenizer.py",
+      "original_sha256": "eb5fddfa266f73daa1e7c6fea27d38633424f95f5d58ffba005dd8dfa2e7a81e",
+      "vendored_sha256": "63e47e9bb11fec78041aecbd467dce6d707a2f6524868c28c0686d59b11a6192",
+      "vendored_sha256_before_license_notice": "d079689926ec59a85542314620a687f266cf87dc45d18e65ba25107f1d5c3277",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/transcribe.py",
+      "original_sha256": "852954d64224d6487ec9a9bbf17c27442e52e1872488609c28facdcb051fea5b",
+      "vendored_sha256": "f94415651aaa4712071d9d54a42f0fc16b5c5dd2e71a6ad045403da0e0ffff8d",
+      "vendored_sha256_before_license_notice": "e864ef03e1c3f03b71d209644cfe4d5e14e51f2dea3703e832bc41fb15403172",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/triton_ops.py",
+      "original_sha256": "a9e7081f8d4b2103d0076f7f0b1dee1d4642293ceb770d6e8adae632d1f8fccc",
+      "vendored_sha256": "9aa879da28d7a2f87f628b8f1fcb51f1bc92bdafea6f7743f0c99af3d5bd6fbe",
+      "vendored_sha256_before_license_notice": "9f8c7d0ae1746d988fddadee5b0db237a6122aeae25266e52c67406bae36ab09",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/utils.py",
+      "original_sha256": "be94d22474373cf0714a1606381c5fcd81fb5d1c7332091a63274f4b0916ef68",
+      "vendored_sha256": "0fe920d4426dd9892c12b9e3306bac29a260d51ea6f1a62a2e48dbd198690a1c",
+      "vendored_sha256_before_license_notice": "02e7e40103772517d8942b8101668a69ab1c6f9114f9f911aef6a068edfca57a",
+      "local_changes": "source formatting during vendoring",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/assets/gpt2.tiktoken",
+      "original_sha256": "ccf876776dd2a896257e3427ff8627bd1d3538023617d507ebba654d57d36557",
+      "vendored_sha256": "ccf876776dd2a896257e3427ff8627bd1d3538023617d507ebba654d57d36557"
+    },
+    {
+      "source": "whisper/assets/multilingual.tiktoken",
+      "original_sha256": "febeed8e568f92d9ca984580bc2e6b605b867dc5ba4486f9646de381b44a8226",
+      "vendored_sha256": "febeed8e568f92d9ca984580bc2e6b605b867dc5ba4486f9646de381b44a8226"
+    },
+    {
+      "source": "whisper/assets/mel_filters.npz",
+      "original_sha256": "7450ae70723a5ef9d341e3cee628c7cb0177f36ce42c44b7ed2bf3325f0f6d4c",
+      "vendored_sha256": "7450ae70723a5ef9d341e3cee628c7cb0177f36ce42c44b7ed2bf3325f0f6d4c"
+    },
+    {
+      "source": "__init__.py",
+      "original_sha256": "004f5d2292d39aa519db97595495135b5594bc3b333f43cfc03d52f31076f810",
+      "vendored_sha256": "4cf4d78876dc16a317883c49b623afa1b94de01eba167c9dccdc1eb3ed7055eb",
+      "local_changes": "reduced package initialization to avoid unrelated imports and automatic downloads",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "simul_whisper/__init__.py",
+      "original_sha256": "ac88827b3aef8e0d7f7c5fd0137e45853320a553b6d2914a053489d745ebb09c",
+      "vendored_sha256": "4cf4d78876dc16a317883c49b623afa1b94de01eba167c9dccdc1eb3ed7055eb",
+      "local_changes": "reduced package initialization to avoid unrelated imports and automatic downloads",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/__init__.py",
+      "original_sha256": "38cc244981e61bdb9d2af7dd1e9173e5a00564ceb5ffd29347a034fe85841516",
+      "vendored_sha256": "652d6a8ca25712484ffb0a4b376ec6e76dfd2140d91e8026543d3982a74b5c86",
+      "local_changes": "reduced package initialization to avoid unrelated imports and automatic downloads",
+      "modification_notice_added": "2026-10-05"
+    },
+    {
+      "source": "whisper/assets/__init__.py",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "vendored_sha256": "4cf4d78876dc16a317883c49b623afa1b94de01eba167c9dccdc1eb3ed7055eb",
+      "local_changes": "reduced package initialization to avoid unrelated imports and automatic downloads",
+      "modification_notice_added": "2026-10-05"
+    }
+  ],
+  "adapter_notes": [
+    "Adapter uses the low-level AlignAtt decoder with the already-loaded CTranslate2 encoder; the broad WLK server/backend is not imported.",
+    "Commit split correction: export only token groups included in the committed hypothesis; hold last word/Unicode unit until more audio or final flush.",
+    "Auto language identification runs before first commit; no initial language-less hypotheses are translated.",
+    "No text-only repetition-loop removal or DRY penalty: real repeated speech remains repeatable.",
+    "CT2 features are converted to the decoder weight dtype; decoder uses CUDA fp16 and known official turbo/large-v3 alignment heads.",
+    "Windows without Triton uses the upstream Torch median-filter fallback; numba and tiktoken are required.",
+    "Returned attention timestamps include upstream estimated final-token duration; adapter constrains metadata to received audio.",
+    "ASR API errors propagate; upstream wrapper behavior that turns exceptions into empty output is not used."
+  ],
+  "license_sources": [
+    {
+      "project": "SimulStreaming",
+      "file": "LICENSE-SimulStreaming.txt",
+      "repository": "https://github.com/ufal/SimulStreaming",
+      "revision": "077ea37d5ab4ff98bc567e4507f140dc4e5d5ad6",
+      "license": "MIT",
+      "scope": "Ancestral SimulStreaming code included through WhisperLiveKit simul_whisper; exact intermediate ancestor revision not recorded by WhisperLiveKit.",
+      "url": "https://raw.githubusercontent.com/ufal/SimulStreaming/077ea37d5ab4ff98bc567e4507f140dc4e5d5ad6/LICENCE.txt",
+      "sha256": "03606b50d69a4248dc386dde4f5f08460ac258aa01f04746d5973875925442cc",
+      "retrieved_date": "2026-10-05",
+      "revision_kind": "license_source_revision"
+    },
+    {
+      "project": "Simul-Whisper",
+      "file": "LICENSE-SimulWhisper.txt",
+      "repository": "https://github.com/backspacetg/simul_whisper",
+      "revision": "ffeb3ff333026f29053d01c95a1a0524f2a41865",
+      "license": "Apache-2.0",
+      "scope": "Ancestral Simul-Whisper AlignAtt/CIF code included through WhisperLiveKit; license revision only, not a claim about exact copied source revision.",
+      "url": "https://raw.githubusercontent.com/backspacetg/simul_whisper/ffeb3ff333026f29053d01c95a1a0524f2a41865/LICENSE.txt",
+      "sha256": "16e2a26aa851aa0628ca334383ceba229bbc31233c8e15c5873056841a6b575d",
+      "retrieved_date": "2026-10-05",
+      "revision_kind": "license_source_revision"
+    },
+    {
+      "project": "MOSST / fairseq",
+      "file": "LICENSE-MOSST.txt",
+      "repository": "https://github.com/dqqcasia/mosst",
+      "revision": "26eaaa61557aecae9e83410e7fddb90cffe2a704",
+      "license": "MIT",
+      "scope": "simul_whisper/eow_detection.py resize() explicitly attributes MOSST; license revision only, not a claim about exact copied source revision.",
+      "url": "https://raw.githubusercontent.com/dqqcasia/mosst/26eaaa61557aecae9e83410e7fddb90cffe2a704/LICENSE",
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "retrieved_date": "2026-10-05",
+      "revision_kind": "license_source_revision"
+    },
+    {
+      "project": "Silero VAD",
+      "file": "LICENSE-Silero-VAD.txt",
+      "repository": "https://github.com/snakers4/silero-vad",
+      "revision": "1e261b036686cd0017d500ee96acd1c4ba572a9d",
+      "license": "MIT",
+      "scope": "Separate bundled runtime asset runtime/python/Lib/site-packages/faster_whisper/assets/silero_vad_v6.onnx and adapted faster_whisper/vad.py. Not source in this vendor subtree; bundled via faster-whisper 1.2.1. License revision only.",
+      "url": "https://raw.githubusercontent.com/snakers4/silero-vad/1e261b036686cd0017d500ee96acd1c4ba572a9d/LICENSE",
+      "sha256": "2e63e9a38b6e8fc0c7bc37ce174caca1862870856c6daf5697cfb785e925520b",
+      "retrieved_date": "2026-10-05",
+      "revision_kind": "license_source_revision"
+    }
+  ],
+  "license_notice_update_date": "2026-10-05"
+}

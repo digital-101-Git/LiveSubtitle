@@ -10,6 +10,26 @@
 
 LiveSubtitle은 Chrome·Edge에서 재생하는 방송, PC의 시스템 소리 또는 마이크 음성을 인식하고 번역한 뒤, 화면 위에 자막으로 표시하는 Windows 앱입니다. 브라우저 확장 프로그램 없이 사용할 수 있습니다.
 
+### 사용 조건
+
+- 사용 전 **시스템 메모리(RAM)를 10GB 이상 여유로 확보**하세요. 설치된 총용량이 아니라, 다른 프로그램이 사용 중인 메모리를 제외한 여유 공간 기준입니다.
+- **NVIDIA GPU가 필수**입니다. 현재 로컬 추론은 CUDA를 사용하며, 테스트에는 **GeForce RTX 4080 16GB**를 사용했습니다.
+- 필요한 RAM과 GPU 메모리(VRAM)는 선택한 음성 인식·번역 모델에 따라 달라집니다. 게임이나 방송 프로그램과 함께 실행하려면 메모리와 GPU 성능에 추가 여유가 필요합니다.
+
+### 주요 사용처
+
+- **인터넷 방송 시청:** 외국어 방송의 음성을 실시간으로 인식·번역해 오버레이 자막으로 표시합니다.
+- **YouTube 시청:** 영상의 음성을 받아 원문 또는 번역 자막을 표시합니다.
+- **마이크 음성 자막:** 마이크로 입력한 말을 인식·번역해 모니터에 오버레이로 표시합니다. 스트리머도 활용할 수 있지만, 방송과 함께 처리할 수 있는 메모리·GPU 여유가 필요합니다.
+- **영상·강의·팟캐스트 시청:** 시스템 전체 소리를 입력으로 선택해 PC에서 재생되는 콘텐츠의 자막을 표시합니다.
+- **같은 언어로 받아쓰기:** 입력 언어와 번역 언어를 같게 설정하면, 번역 없이 인식한 원문을 자막으로 표시합니다.
+
+> [!WARNING]
+> **음성 인식과 번역 처리로 인해 자막은 실제 음성보다 약 5초 늦게 표시됩니다.**
+> 지연 시간은 모델, PC 성능, 발화 길이와 동시 실행 프로그램에 따라 달라질 수 있습니다. 영상 재생을 지연시켜 자막과 자동으로 맞추는 기능은 없습니다.
+
+### 동작 방식과 주요 기능
+
 기본 로컬 모드에서는 음성 인식과 번역을 모두 PC에서 처리합니다. 음성 인식은 Qwen3-ASR 또는 Whisper, 번역은 GGUF 모델을 사용하는 llama.cpp가 담당합니다. 선택 기능인 Gemini Live를 사용하면 음성 인식용 오디오가 Google로 전송되며 API 키가 필요합니다. 이 경우에도 번역은 로컬 모델에서 처리합니다.
 
 - **입력·번역 언어:** 한국어, 영어, 중국어, 일본어. 입력은 자동 감지도 지원하며 번역 언어의 기본값은 한국어입니다. 실제 번역 가능 언어는 선택한 모델에 따라 다릅니다.
@@ -26,6 +46,26 @@ LiveSubtitle은 Chrome·Edge에서 재생하는 방송, PC의 시스템 소리 �
 ## Introduction · English
 
 LiveSubtitle is a Windows application that transcribes and translates audio from Chrome, Edge, the system mix, or a microphone, then displays the translation as an on-screen subtitle overlay. No browser extension is required.
+
+### Requirements
+
+- Keep **at least 10GB of system memory (RAM) available** before starting the app. This means memory left free after other applications are running, not total installed RAM.
+- **An NVIDIA GPU is required.** Local inference currently uses CUDA. Testing was performed with a **GeForce RTX 4080 16GB**.
+- RAM and GPU memory (VRAM) requirements depend on the selected speech recognition and translation models. Running games or broadcasting software alongside the app requires additional memory and GPU capacity.
+
+### Use cases
+
+- **Live streams:** Transcribe and translate foreign-language broadcasts into subtitle overlays.
+- **YouTube videos:** Display original-language or translated captions from the video's audio.
+- **Microphone captions:** Transcribe or translate microphone input and display it as a monitor overlay. Streamers can also use this, provided there is enough memory and GPU capacity to run it alongside broadcasting software.
+- **Videos, lectures, and podcasts:** Select all system audio to caption content playing on the PC.
+- **Same-language transcription:** Set the input and translation languages to the same language to display the recognized original text without translation.
+
+> [!WARNING]
+> **Speech recognition and translation introduce approximately 5 seconds of delay between the audio and the displayed captions.**
+> Actual latency varies with the models, PC performance, speech length, and other running applications. The app does not delay video playback to synchronize it with captions.
+
+### How it works and key features
 
 In local mode, both speech recognition and translation run on your PC. The app uses Qwen3-ASR or Whisper for recognition and llama.cpp with GGUF models for translation. Optional Gemini Live recognition sends audio to Google and requires an API key; translation still runs locally.
 

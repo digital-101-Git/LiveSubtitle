@@ -79,9 +79,8 @@ These models have been checked for successful loading and inference in this app.
 | Translation into Korean | HY-MT2-7B · Q6_K | [Download GGUF file](https://huggingface.co/tencent/Hy-MT2-7B-GGUF/resolve/ab8472660ac61fac25f1af43fac2599d52a8a775/HY-MT2-7B-Q6_K.gguf?download=true) |
 | Translation into Korean | MiLMMT-46-12B-v1.0 · i1-Q4_K_M | [Download GGUF file](https://huggingface.co/mradermacher/MiLMMT-46-12B-v1.0-i1-GGUF/resolve/0d63dcbbc3e011bb2728c36769b991cd0109a2dc/MiLMMT-46-12B-v1.0.i1-Q4_K_M.gguf?download=true) |
 | Translation into Korean | TranslateGemma 12B · Q4_K_M | [Download GGUF file](https://huggingface.co/bullerwins/translategemma-12b-it-GGUF/resolve/d7d1d8cc4ff53d4bc883ef33eae3894f07833b63/translategemma-12b-it-Q4_K_M.gguf?download=true) |
-| Japanese-to-Korean translation only | ja-ko-vn-12b-v2 · Q4_K_M | [GGUF file list](https://huggingface.co/hell0ks/ja-ko-vn-12b-v2-gguf/tree/main) |
 
-**For JA-KO-VN, set the input language to Japanese (or automatic detection) and the translation language to Korean.** Keeping the original filename, such as `ja-ko-vn-12b-v2-Q4_K_M.gguf`, lets the app automatically select the dedicated translation method that sends only the Japanese source text. For other language pairs, use a multilingual model such as HY-MT2. The table lists models whose loading and output have been checked; it does not rank their accuracy.
+The table lists models whose loading and output have been checked; it does not rank their accuracy.
 
 ## Where to put model files
 

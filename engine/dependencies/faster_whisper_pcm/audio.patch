@@ -1,0 +1,50 @@
+--- a/faster_whisper/audio.py
++++ b/faster_whisper/audio.py
+@@ -12,8 +12,22 @@
+ 
+ from typing import BinaryIO, Union
+ 
+-import av
+ import numpy as np
++
++
++def _require_av():
++    """Load optional file decoding support only when file input is requested."""
++    try:
++        import av
++    except ModuleNotFoundError as exc:
++        if exc.name != "av":
++            raise
++        raise ImportError(
++            "Audio file decoding requires the optional PyAV package. "
++            "This PCM-only build accepts mono float32 NumPy arrays at "
++            "the requested sampling rate."
++        ) from exc
++    return av
+ 
+ 
+ def decode_audio(
+@@ -34,6 +48,7 @@
+       If `split_stereo` is enabled, the function returns a 2-tuple with the
+       separated left and right channels.
+     """
++    av = _require_av()
+     resampler = av.audio.resampler.AudioResampler(
+         format="s16",
+         layout="mono" if not split_stereo else "stereo",
+@@ -77,6 +92,7 @@
+ 
+ 
+ def _ignore_invalid_frames(frames):
++    av = _require_av()
+     iterator = iter(frames)
+ 
+     while True:
+@@ -89,6 +105,7 @@
+ 
+ 
+ def _group_frames(frames, num_samples=None):
++    av = _require_av()
+     fifo = av.audio.fifo.AudioFifo()
+ 
+     for frame in frames:

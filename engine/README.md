@@ -11,6 +11,14 @@ The API binds only to `127.0.0.1`. Its persistent random bearer token is created
 browser clients must use a `chrome-extension://<extension-id>` origin and the token.
 Model import additionally requires a native client without an Origin header.
 
+Without saved settings, the engine selects local Qwen3-ASR-1.7B
+(`models/asr/qwen3-asr-1.7b`) and HY-MT2-7B Q6_K
+(`models/translation/HY-MT2-7B-Q6_K.gguf`), automatic input-language detection,
+Korean output, the default (`legacy`) ASR profile, empty hints, and sentence
+boundary recheck off. Saved user selections take precedence; changing these
+defaults does not rewrite existing settings. The Windows UI initially uses
+browser placement for the overlay and preserves its saved placement afterward.
+
 Modules:
 
 - `server.py`: HTTP/WS API, authentication, lifecycle, CLI.
@@ -393,6 +401,13 @@ The symlink-escape test skips when Windows denies symlink creation.
 
 `requirements.txt` records the direct dependencies used in the bundled runtime;
 pytest is a development dependency and is not required to run the service.
+For a fresh source environment, run
+`python engine/dependencies/build_pcm_whisper.py --install` from the app root.
+It builds the hash-pinned `faster-whisper 1.2.1+livesubtitle.pcm1` dependency before
+installing requirements. The live PCM path does not install PyAV or SoundFile.
+The fork preserves the upstream Silero-v6 code and asset byte-for-byte; source,
+license, offline setup, and release staging instructions are in
+[`dependencies/faster_whisper_pcm/README.md`](dependencies/faster_whisper_pcm/README.md).
 
 Provider protocol reference:
 https://ai.google.dev/gemini-api/docs/live-api/live-transcribe

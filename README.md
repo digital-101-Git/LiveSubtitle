@@ -27,6 +27,9 @@ LiveSubtitle은 Chrome·Edge에서 재생하는 방송, PC의 시스템 소리 �
 > [!WARNING]
 > **음성 인식과 번역 처리로 인해 자막은 실제 음성보다 약 5초 늦게 표시됩니다.**
 > 지연 시간은 모델, PC 성능, 발화 길이와 동시 실행 프로그램에 따라 달라질 수 있습니다. 영상 재생을 지연시켜 자막과 자동으로 맞추는 기능은 없습니다.
+>
+> **배경음악·효과음이 음성과 겹치거나, 잡음·왜곡 등으로 오디오 품질이 좋지 않으면 음성 인식 정확도가 크게 떨어질 수 있습니다.**
+> 이 경우 대사가 누락되거나 잘못 인식되어, 원문과 번역 자막이 부정확하게 표시될 수 있습니다.
 
 ### 동작 방식과 주요 기능
 
@@ -64,6 +67,9 @@ LiveSubtitle is a Windows application that transcribes and translates audio from
 > [!WARNING]
 > **Speech recognition and translation introduce approximately 5 seconds of delay between the audio and the displayed captions.**
 > Actual latency varies with the models, PC performance, speech length, and other running applications. The app does not delay video playback to synchronize it with captions.
+>
+> **Background music or sound effects overlapping speech, as well as poor audio quality caused by noise or distortion, can significantly reduce speech recognition accuracy.**
+> Speech may be missed or misrecognized, resulting in inaccurate transcriptions and translated subtitles.
 
 ### How it works and key features
 
@@ -183,6 +189,13 @@ LiveSubtitle/
 ## 테스트 결과
 
 **평가일: 2026-10-05 · NVIDIA GeForce RTX 4080 16GB · 중국어 드라마 음성→한국어 자막.**
+
+제공받은 테스트 영상 안내 링크입니다. 실제 평가 구간과 결과는 아래의 로컬 입력 파일 기준 설명을 따릅니다.
+
+- **테스트 영상:** [YouTube 영상](https://youtu.be/ndhgOQNXx9M)
+- **샘플1:** [YouTube 영상](https://youtu.be/Q9-UW8XsW18)
+- **샘플2:** [YouTube 영상](https://youtu.be/2VZ6pnNiHjc)
+- **샘플3:** [YouTube 영상](https://youtu.be/njwKA9sdcPI)
 
 Qwen3-ASR-1.7B, Whisper large-v3-turbo, Gemini Live와 두 번역 모델을 조합하여 **4개 입력 영상 × 3개 음성 인식 모델 × 2개 번역 모델 × 각 3회 = 총 72회** 실행했습니다. 72회 모두 비교 가능한 상태로 완료했으며, 실행 제외는 없었습니다. 실행 완료가 모든 문장의 번역 성공을 뜻하지는 않습니다.
 

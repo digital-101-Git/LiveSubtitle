@@ -135,6 +135,9 @@
       </Grid>
     </Grid>
     <TextBlock Grid.Row="1" Text="{DynamicResource Ui.2f76b48bc782ec8b}" HorizontalAlignment="Right" VerticalAlignment="Top" Foreground="#7185A5" FontSize="11" Margin="0,2,0,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTip="{DynamicResource Ui.2f76b48bc782ec8b}"/>
-    <TextBlock Grid.Row="3" Text="MIT · Copyright (c) 2026 digital-101" HorizontalAlignment="Center" TextAlignment="Center" Foreground="#7185A5" FontSize="11"/>
+    <Grid x:Name="FooterBar" Grid.Row="3">
+      <TextBlock x:Name="CopyrightText" Text="MIT · Copyright (c) 2026 digital-101" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Foreground="#7185A5" FontSize="11"/>
+      <TextBlock x:Name="VersionText" HorizontalAlignment="Right" VerticalAlignment="Center" TextAlignment="Right" Foreground="#7185A5" FontSize="11"/>
+    </Grid>
   </Grid>
 </Window>

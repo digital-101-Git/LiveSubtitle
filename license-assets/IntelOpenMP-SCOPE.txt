@@ -1,0 +1,27 @@
+Intel OpenMP runtime notices
+Copyright Intel Corporation.
+
+Scope: libiomp5md.dll and libiompstubs5md.dll acquired from Intel
+intelopenmp.redist.win 2025.3.2.833 (NuGet), used by PyTorch, and the
+separate CTranslate2 libiomp5md.dll acquired from Intel
+intelopenmp.redist.win 2025.3.0.640 (NuGet). The original binary bytes
+are unchanged. Both packages provide byte-identical licenses and OpenMP
+notices. Package-level terms are in IntelOpenMP/LICENSE.txt.
+OpenMP component terms are in IntelOpenMP/third-party-programs.txt.
+
+The original OpenMP notice references a oneTBB notice under
+<install_dir>/tbb/latest/licensing/third-party-programs.txt.
+In this notice bundle, that document is supplied unchanged at
+IntelOpenMP/oneTBB/third-party-programs.txt. It was acquired from
+Intel inteltbb.redist.win 2022.2.0.503, matching the embedded
+oneTBB allocator version strings in both DLL versions (also confirmed
+by a matching PDB for the PyTorch DLL).
+It is also byte-identical to the notice in 2022.3.1.401.
+The corresponding oneTBB license is included alongside it.
+
+These are component-specific notices, not a license for LiveSubtitle
+or unrelated bundled software. The complete vendor files are retained;
+not every component named in a family-wide notice is necessarily
+incorporated into each distributed DLL. No separate TBB/TCM binaries
+are added by this notice bundle. Microsoft runtimes, if distributed,
+require their separately established redistribution basis.

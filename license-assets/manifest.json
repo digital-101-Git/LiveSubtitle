@@ -1,0 +1,217 @@
+{
+  "review_date": "2026-10-05",
+  "scope": "Named component notices for the LiveSubtitle v1.0.0 Windows PCM runtime. App MIT does not replace these terms.",
+  "originals": [
+    {
+      "file": "CUDA-12.4.1-EULA.html",
+      "source": "https://docs.nvidia.com/cuda/archive/12.4.1/eula/index.html",
+      "component": "llama.cpp CUDA 12.4 runtime",
+      "bytes": 85051,
+      "sha256": "c0e213c4c53fbc9b29dc3e8cea0fb06b0498a28eca01858d3611d975dd70f585",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "CUDA-12.8.1-EULA.html",
+      "source": "https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html",
+      "component": "PyTorch CUDA 12.8 runtime",
+      "bytes": 103460,
+      "sha256": "6722d4c310a2ec9ad869ede3371a648fe2cfc2baaf8e1ece2c35e1dccc05752c",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "CUPTI-12.8.90-LICENSE.txt",
+      "source": "https://developer.download.nvidia.com/compute/cuda/redist/cuda_cupti/windows-x86_64/cuda_cupti-windows-x86_64-12.8.90-archive.zip",
+      "component": "retained CUDA 12.8 CUPTI runtime; nvperf_host.dll excluded",
+      "bytes": 63021,
+      "sha256": "e2c71babfd18a8e69542dd7e9ca018f9caa438094001a58e6bc4d8c999bf0d07",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "DOTNET-NETCore-Runtime-10.0.12-LICENSE.txt",
+      "source": "https://www.nuget.org/packages/Microsoft.NETCore.App.Runtime.win-x64/10.0.12",
+      "component": "Microsoft.NETCore.App.Runtime.win-x64 10.0.12",
+      "bytes": 1139,
+      "sha256": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "DOTNET-NETCore-Runtime-10.0.12-THIRD-PARTY-NOTICES.txt",
+      "source": "https://www.nuget.org/packages/Microsoft.NETCore.App.Runtime.win-x64/10.0.12",
+      "component": "Microsoft.NETCore.App.Runtime.win-x64 10.0.12",
+      "bytes": 78041,
+      "sha256": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "DOTNET-WindowsDesktop-Runtime-10.0.12-LICENSE.txt",
+      "source": "https://www.nuget.org/packages/Microsoft.WindowsDesktop.App.Runtime.win-x64/10.0.12",
+      "component": "Microsoft.WindowsDesktop.App.Runtime.win-x64 10.0.12",
+      "bytes": 1137,
+      "sha256": "a89886665765362eb77e0f8e26602c924520041d1711b2eedc136434fe4d01ab",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "IntelOpenMP/LICENSE.txt",
+      "source": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.2.833",
+      "component": "intelopenmp.redist.win/2025.3.2.833",
+      "bytes": 4090,
+      "sha256": "6c00ae54b2a610ea009e0f5c5d3aa79023eb694c7fb72857654c53c6e99d7c97",
+      "upstream_text_unchanged": true,
+      "also_identical_in_package": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.0.640"
+    },
+    {
+      "file": "IntelOpenMP/oneTBB/LICENSE.txt",
+      "source": "https://www.nuget.org/packages/inteltbb.redist.win/2022.2.0.503",
+      "component": "inteltbb.redist.win/2022.2.0.503",
+      "bytes": 4180,
+      "sha256": "4229ebf297195a64279a99566431731c411f744a34e1213a5b1e69a8fa286ea1",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "IntelOpenMP/oneTBB/third-party-programs.txt",
+      "source": "https://www.nuget.org/packages/inteltbb.redist.win/2022.2.0.503",
+      "component": "inteltbb.redist.win/2022.2.0.503",
+      "bytes": 19503,
+      "sha256": "1f6de0bd498c04c9283c6306379e2db2492e1c4e7d2b248c8de0e8fe9124cd03",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "IntelOpenMP/third-party-programs.txt",
+      "source": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.2.833",
+      "component": "intelopenmp.redist.win/2025.3.2.833",
+      "bytes": 31578,
+      "sha256": "f8ce918fe7311ce279e68380a2e233f8a42b1cd3dda8f4c48d6de97a0255c1d7",
+      "upstream_text_unchanged": true,
+      "also_identical_in_package": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.0.640"
+    },
+    {
+      "file": "LICENSE-CTranslate2-4.8.2.txt",
+      "source": "https://raw.githubusercontent.com/OpenNMT/CTranslate2/v4.8.2/LICENSE",
+      "component": "CTranslate2 4.8.2",
+      "bytes": 1115,
+      "sha256": "54aa79d9fe3c09e67a16dcd95b9e88676405a6ec174efda31036983cf7672ecb",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "LICENSE-faster-whisper-1.2.1.txt",
+      "source": "https://github.com/SYSTRAN/faster-whisper/blob/v1.2.1/LICENSE",
+      "component": "faster-whisper 1.2.1 upstream; LiveSubtitle PCM-input changes retain MIT",
+      "bytes": 1064,
+      "sha256": "af6798135e729f8aa6c853936d037dfdea449734d26b8ea6a89805fca758c0d5",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "LICENSE-flatbuffers-25.12.19.txt",
+      "source": "https://raw.githubusercontent.com/google/flatbuffers/v25.12.19/LICENSE",
+      "component": "flatbuffers-25.12.19",
+      "bytes": 11358,
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "LICENSE-llama.cpp-b11378.txt",
+      "source": "https://raw.githubusercontent.com/ggml-org/llama.cpp/b11378/LICENSE",
+      "component": "llama.cpp b11378",
+      "bytes": 1078,
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "LICENSE-tokenizers-0.23.2.txt",
+      "source": "https://raw.githubusercontent.com/huggingface/tokenizers/v0.23.2/LICENSE",
+      "component": "tokenizers-0.23.2",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "NVIDIA-CUBLAS-12.9.2.10-License.txt",
+      "source": "https://pypi.org/project/nvidia-cublas-cu12/12.9.2.10/",
+      "component": "nvidia-cublas-cu12 12.9.2.10 wheel license",
+      "bytes": 59262,
+      "sha256": "ad6f5853fba0ca0d159d0f58d49ae49830c2f8c93f7a92648b9ce90adb4c6ccd",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "NVIDIA-CUDA-NVRTC-12.9.86-License.txt",
+      "source": "https://pypi.org/project/nvidia-cuda-nvrtc-cu12/12.9.86/",
+      "component": "nvidia-cuda-nvrtc-cu12 12.9.86 wheel license",
+      "bytes": 59262,
+      "sha256": "ad6f5853fba0ca0d159d0f58d49ae49830c2f8c93f7a92648b9ce90adb4c6ccd",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "NVIDIA-CUDA-Runtime-12.9.79-License.txt",
+      "source": "https://pypi.org/project/nvidia-cuda-runtime-cu12/12.9.79/",
+      "component": "nvidia-cuda-runtime-cu12 12.9.79 wheel license",
+      "bytes": 59262,
+      "sha256": "ad6f5853fba0ca0d159d0f58d49ae49830c2f8c93f7a92648b9ce90adb4c6ccd",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "NVIDIA-CUDNN-9.27.0.42-wheel-License.txt",
+      "source": "https://pypi.org/project/nvidia-cudnn-cu12/9.27.0.42/",
+      "component": "nvidia-cudnn-cu12 9.27.0.42 wheel license",
+      "bytes": 18174,
+      "sha256": "49cf79bdb35734b52fe6203013b3bd759f81e998cd32aa2c65c51db9a88c61d2",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "cuDNN-EULA-20261005.html",
+      "source": "https://docs.nvidia.com/deeplearning/cudnn/backend/latest/reference/eula.html",
+      "component": "dated documentation snapshot; use matching versioned EULA",
+      "bytes": 44129,
+      "sha256": "fa88698d23e060e82b95c01cf47f08f9f3f6a371ded3aa1abe405b264153814e",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "cuDNN-v9.19.0-EULA.html",
+      "source": "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.19.0/reference/eula.html",
+      "component": "PyTorch cuDNN 9.19",
+      "bytes": 43991,
+      "sha256": "a28ad049b0fc356d7d9f7f5fa81d38d482f966eef95e7d6a276bc5c12f36cf23",
+      "upstream_text_unchanged": true
+    },
+    {
+      "file": "cuDNN-v9.27.0-EULA.html",
+      "source": "https://docs.nvidia.com/deeplearning/cudnn/backend/v9.27.0/reference/eula.html",
+      "component": "NVIDIA cuDNN 9.27",
+      "bytes": 44129,
+      "sha256": "fa88698d23e060e82b95c01cf47f08f9f3f6a371ded3aa1abe405b264153814e",
+      "upstream_text_unchanged": true
+    }
+  ],
+  "intel_binary_provenance": {
+    "package": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.2.833",
+    "binaries_unmodified": true,
+    "files": [
+      {
+        "name": "libiomp5md.dll",
+        "bytes": 1614184,
+        "sha256": "eb14cf741b10a6ca176acded284bff7b069e421f49927e28fef9685c6f62abf3"
+      },
+      {
+        "name": "libiompstubs5md.dll",
+        "bytes": 43880,
+        "sha256": "3707fae5baa5c77da4a355d9977cf132251310db89923bf944b1da6dec702922"
+      }
+    ],
+    "onetbb_notice_version": "2022.2.0.503 (embedded allocator reports 2022.2.0)",
+    "additional_ctranslate2_binary": {
+      "package": "https://www.nuget.org/packages/intelopenmp.redist.win/2025.3.0.640",
+      "path": "runtime/python/Lib/site-packages/ctranslate2/libiomp5md.dll",
+      "bytes": 1614192,
+      "sha256": "982233366b0afcda1e0f55a0b134097e35b779613f54ddb69e685e6cd06b755f",
+      "binaries_unmodified": true,
+      "package_catalog_sha512_verified": true,
+      "embedded_allocator_version": "2022.2.0",
+      "notices_identical_to_2025_3_2_833": true
+    }
+  },
+  "excluded_from_windows_release": [
+    "PyAV",
+    "av.libs including FFmpeg/x264/x265",
+    "SoundFile and bundled libsndfile",
+    "torch/lib/nvperf_host.dll"
+  ]
+}

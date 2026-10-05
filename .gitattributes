@@ -1,5 +1,7 @@
 # Normalize our text sources; preserve upstream files and their recorded hashes.
 * text=auto
 engine/_vendor/** -text
+engine/dependencies/faster_whisper_pcm/** -text
 models/** -text
+license-assets/** -text
 *.npz binary

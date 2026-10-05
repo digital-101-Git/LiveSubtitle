@@ -5,14 +5,16 @@ uvicorn==0.54.0
 httpx==0.28.1
 websockets==17.2
 numpy==2.5.3
-faster-whisper==1.2.1
+# First run: python engine/dependencies/build_pcm_whisper.py
+# Or build + install together: python engine/dependencies/build_pcm_whisper.py --install
+# Commands run from the app root. This local fork keeps av as an optional extra.
+./.dependency-build/faster_whisper-1.2.1+livesubtitle.pcm1-py3-none-any.whl
 ctranslate2==4.8.2
 numba==0.68.0
 tiktoken==0.14.0
 onnxruntime==1.30.0
 torch==2.11.0+cu128; sys_platform == "win32"
 transformers==5.18.0
-soundfile==0.13.1
 nvidia-cudnn-cu12==9.27.0.42; sys_platform == "win32"
 nvidia-cublas-cu12==12.9.2.10; sys_platform == "win32"
 nvidia-cuda-runtime-cu12==12.9.79; sys_platform == "win32"

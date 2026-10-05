@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -51,6 +52,9 @@ public partial class MainWindow : Window
         _liveSmokePid = liveSmokePid;
         UiText.SetLanguage(UiText.Language);
         InitializeComponent();
+        string version = typeof(MainWindow).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? typeof(MainWindow).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+        VersionText.Text = "v" + version.Split('+')[0];
         UiText.LanguageChanged += UiText_LanguageChanged;
         Closed += (_, _) => UiText.LanguageChanged -= UiText_LanguageChanged;
         CaptionList.ItemsSource = _captions; LogList.ItemsSource = _logs;
@@ -928,7 +932,7 @@ public partial class MainWindow : Window
         {
             Directory.CreateDirectory(output);
             AudioSources.ItemsSource = new[] { new AudioTarget("Edge · Live music / 라이브 방송", 1234, IntPtr.Zero) }; AudioSources.SelectedIndex = 0;
-            TranslationModels.ItemsSource = new[] { new ModelChoice("Qwen3.5-4B-Q4_K_M.gguf", "models/translation/Qwen3.5-4B-Q4_K_M.gguf") }; TranslationModels.SelectedIndex = 0;
+            TranslationModels.ItemsSource = new[] { new ModelChoice("HY-MT2-7B-Q6_K.gguf", "models/translation/HY-MT2-7B-Q6_K.gguf") }; TranslationModels.SelectedIndex = 0;
             AsrModels.ItemsSource = new[] { new ModelChoice("Qwen3-ASR-1.7B", "models/asr/qwen3-asr-1.7b", "qwen3_asr"), new ModelChoice("Whisper large-v3-turbo", "models/asr/whisper-large-v3-turbo", "whisper") }; AsrModels.SelectedIndex = 0;
             _connected = true;
             VerifyLanguageSelections();

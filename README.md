@@ -2,7 +2,9 @@
 
 음성 인식·번역을 실시간 오버레이 자막으로 표시하는 Windows 앱입니다.
 
-[GitHub 저장소](https://github.com/digital-101-Git/LiveSubtitle) · [사용법](0_사용법/사용법.md) · [개발 환경·빌드 안내](SOURCE_RELEASE.txt)
+[GitHub 저장소](https://github.com/digital-101-Git/LiveSubtitle) · [개발 환경·빌드 안내](SOURCE_RELEASE.txt)
+
+사용자 매뉴얼 · User manuals: [한국어](<0_UserManual(사용자매뉴얼)/사용자매뉴얼.md>) · [English](<0_UserManual(사용자매뉴얼)/UserManual.md>) · [中文](<0_UserManual(사용자매뉴얼)/用户手册.md>) · [日本語](<0_UserManual(사용자매뉴얼)/ユーザーマニュアル.md>)
 
 ## 소개 · 한국어
 
@@ -48,7 +50,7 @@ This application was developed using ChatGPT 6 Astra Ultra.
 3. 오디오 소스, 음성 인식 모델, 번역 모델, 입력 언어와 번역 언어를 선택합니다.
 4. **모델 준비** 후 **실시간 자막 시작**을 누릅니다.
 
-자세한 조작 방법은 기존 [사용법](0_사용법/사용법.md)을 참고하세요.
+자세한 조작 방법은 [사용자 매뉴얼](<0_UserManual(사용자매뉴얼)/사용자매뉴얼.md>)을 참고하세요.
 
 ### 기본 모델 다운로드와 저장 위치
 
@@ -62,7 +64,7 @@ This application was developed using ChatGPT 6 Astra Ultra.
 
 이 저장소에는 위 두 ASR 모델의 설정·토크나이저와 원문 고지가 포함되어 있습니다. 해당 버전에 맞는 위 가중치를 추가하세요. 다른 버전이나 모델을 사용한다면 필요한 부속 파일도 함께 준비합니다. Whisper의 `model.bin`은 기본 인식용이고, `.pt` 파일은 AlignAtt 실험 기능용으로 구분합니다.
 
-번역 GGUF는 **원래 파일명을 유지**하세요. 현재 앱은 알려진 모델의 파일명으로 전용 번역 방식을 선택합니다. 검증된 추가 모델과 저장 방법은 [사용법의 모델 목록](0_사용법/사용법.md#검증된-모델-다운로드)에 있습니다. 임의의 GGUF를 추가하면 모두 정상 번역되는 구조는 아닙니다. `ja-ko-vn-12b-v2`는 일본어→한국어 전용입니다.
+번역 GGUF는 **원래 파일명을 유지**하세요. 현재 앱은 알려진 모델의 파일명으로 전용 번역 방식을 선택합니다. 검증된 추가 모델과 저장 방법은 [매뉴얼의 모델 목록](<0_UserManual(사용자매뉴얼)/사용자매뉴얼.md#검증된-모델-다운로드>)에 있습니다. 임의의 GGUF를 추가하면 모두 정상 번역되는 구조는 아닙니다. `ja-ko-vn-12b-v2`는 일본어→한국어 전용입니다.
 
 ## 구조
 
@@ -102,7 +104,7 @@ LiveSubtitle/
 │  └─ llama/                  llama-server와 관련 DLL
 ├─ config/                    실행 시 생성되는 개인 설정·인증 정보
 ├─ logs/                      실행 시 생성되는 번역 기록·엔진 로그
-├─ 0_사용법/사용법.md          사용자 안내
+├─ 0_UserManual(사용자매뉴얼)/ 한국어·영어·중국어·일본어 매뉴얼
 ├─ build.ps1                  Windows 앱 빌드
 ├─ API.txt                    로컬 엔진 API 설명
 ├─ SOURCE_RELEASE.txt         개발 환경·소스 배포 안내

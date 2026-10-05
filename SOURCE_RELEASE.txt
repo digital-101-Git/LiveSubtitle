@@ -31,7 +31,7 @@ WhisperLiveKit 계열의 Apache-2.0, OpenAI Whisper 및 관련 MIT 고지 등을
   src/                          C# WPF 앱 소스
   engine/                       Python 엔진·requirements.txt·테스트
   engine/_vendor/                외부 코드·필수 자산·라이선스·출처 기록
-  0_사용법/                     사용자 안내
+  0_UserManual(사용자매뉴얼)/    한국어·영어·중국어·일본어 사용자 매뉴얼
   models/asr/qwen3-asr-1.7b/     검증 버전의 설정·토크나이저·원문 고지
   models/asr/whisper-large-v3-turbo/ 검증 버전의 설정·토크나이저·원문 고지
   models/translation/모델다운로드.md 번역 모델 다운로드 안내
@@ -60,7 +60,7 @@ Git에 포함될 파일 목록을 확인하고, 현재 실행 폴더 전체를 �
 현재 config 파일을 예제 설정으로 복사하지 말고 앱의 기본 설정을 사용하세요.
 
 모델은 사용자가 공식 배포처에서 별도로 내려받아 사용하도록 안내합니다.
-다운로드 링크와 배치 방법은 0_사용법/사용법.md에 있습니다.
+다운로드 링크와 배치 방법은 0_UserManual(사용자매뉴얼)의 각 언어 매뉴얼에 있습니다.
 Qwen3-ASR와 HY-MT2는 Apache-2.0, Whisper는 MIT이며,
 TranslateGemma와 MiLMMT에는 Gemma Terms of Use가 적용됩니다.
 모델의 별도 약관은 앱의 MIT 라이선스로 대체되지 않습니다.

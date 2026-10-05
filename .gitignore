@@ -12,7 +12,7 @@
 !/build.ps1
 !/src/
 !/engine/
-!/0_사용법/
+!/0_UserManual(사용자매뉴얼)/
 !/models/
 
 # Include verified metadata only, never model weights.

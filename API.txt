@@ -18,7 +18,7 @@ LiveSubtitle Engine API v1 — Windows 앱과 미래 브라우저 확장 공용
   HTTP: http://127.0.0.1:17865
   WebSocket: ws://127.0.0.1:17865/v1/stream
 - 서버는 loopback에만 바인딩합니다.
-- GET /health만 공개하며 {ok:true, service:"LiveSubtitle", version:"0.1.0"}를 반환합니다.
+- GET /health만 공개하며 {ok:true, service:"LiveSubtitle", version:"1.0.1"}를 반환합니다.
 - HTTP /v1/*는 Authorization: Bearer <token>이 필요합니다.
 - 토큰은 첫 실행 시 config/engine-token.txt에 생성됩니다. 문서나 확장 소스에 넣지 마세요.
 - 기본 임의 웹사이트 Origin은 거부합니다. Chromium extension Origin과 Origin 없는

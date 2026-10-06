@@ -15,11 +15,9 @@ namespace LiveSubtitle.App;
 public sealed class OverlayWindow : Window
 {
     private readonly Border _surface;
-    private readonly TextBlock _previousTranslation;
-    private readonly TextBlock _translation;
-    private readonly Viewbox _previousLine;
-    private readonly Viewbox _currentLine;
-    private readonly TextBlock _source;
+    private readonly OutlinedCaptionText _previousTranslation;
+    private readonly OutlinedCaptionText _translation;
+    private readonly OutlinedCaptionText _source;
     private readonly TextBlock _editHint;
     private readonly DispatcherTimer _timer;
     private readonly DispatcherTimer _captionTimer;
@@ -59,12 +57,10 @@ public sealed class OverlayWindow : Window
         Left = settings.OverlayLeft; Top = settings.OverlayTop;
         _previousTranslation = CreateTranslationText();
         _translation = CreateTranslationText();
-        _previousLine = CreateTranslationLine(_previousTranslation);
-        _previousLine.Margin = new Thickness(0, 0, 0, 6);
-        _currentLine = CreateTranslationLine(_translation);
-        _source = new TextBlock { Foreground = new SolidColorBrush(Color.FromRgb(207, 221, 239)), TextAlignment = TextAlignment.Center, Margin = new Thickness(0, 6, 0, 0), TextWrapping = TextWrapping.Wrap };
+        _previousTranslation.Margin = new Thickness(0, 0, 0, 6);
+        _source = new OutlinedCaptionText { Foreground = new SolidColorBrush(Color.FromRgb(207, 221, 239)), FontWeight = FontWeights.Bold, FitToBounds = false, Margin = new Thickness(0, 6, 0, 0), TextWrapping = TextWrapping.Wrap };
         _editHint = new TextBlock { Text = UiText.T("드래그해서 이동 · 모서리에서 크기 조절 · 놓은 위치 자동 저장"), Foreground = new SolidColorBrush(Color.FromRgb(111, 237, 197)), FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, TextAlignment = TextAlignment.Center, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 8), Visibility = Visibility.Collapsed };
-        var stack = new StackPanel(); stack.Children.Add(_editHint); stack.Children.Add(_previousLine); stack.Children.Add(_currentLine); stack.Children.Add(_source);
+        var stack = new StackPanel(); stack.Children.Add(_editHint); stack.Children.Add(_previousTranslation); stack.Children.Add(_translation); stack.Children.Add(_source);
         _surface = new Border { Padding = new Thickness(18, 12, 18, 14), CornerRadius = new CornerRadius(10), Child = stack, VerticalAlignment = VerticalAlignment.Bottom, BorderThickness = new Thickness(1) };
         var layout = new Grid { Background = Brushes.Transparent, ClipToBounds = true }; layout.Children.Add(_surface); Content = layout;
         MouseLeftButtonDown += (_, e) =>
@@ -102,7 +98,7 @@ public sealed class OverlayWindow : Window
         if (!_constructing) _hasExternalApply = true;
         _translation.FontSize = Math.Clamp(settings.FontSize, 18, 52);
         _previousTranslation.FontSize = _translation.FontSize;
-        _previousLine.Height = _currentLine.Height = _translation.FontSize * 1.4;
+        _previousTranslation.Height = _translation.Height = _translation.FontSize * 1.4;
         _source.FontSize = Math.Max(14, settings.FontSize * .6);
         _surface.Background = new SolidColorBrush(Color.FromArgb((byte)(255 * Math.Clamp(settings.BackgroundOpacity, 0, .95)), 8, 13, 22));
         _surface.BorderBrush = editing ? new SolidColorBrush(Color.FromRgb(74, 225, 176)) : Brushes.Transparent;
@@ -238,8 +234,8 @@ public sealed class OverlayWindow : Window
         bool preview = _editing && (DateTime.UtcNow - _lastCaption).TotalSeconds > 8;
         _previousTranslation.Text = preview ? "" : SingleLine(_captions.Previous?.Translation ?? "");
         _translation.Text = preview ? UiText.T("실시간 번역 자막이 여기에 표시됩니다.") : SingleLine(_captions.Current?.Translation ?? "");
-        _previousLine.Visibility = !preview && _captions.Previous != null ? Visibility.Visible : Visibility.Collapsed;
-        _currentLine.Visibility = preview || _captions.Current != null ? Visibility.Visible : Visibility.Collapsed;
+        _previousTranslation.Visibility = !preview && _captions.Previous != null ? Visibility.Visible : Visibility.Collapsed;
+        _translation.Visibility = preview || _captions.Current != null ? Visibility.Visible : Visibility.Collapsed;
         _source.Text = preview ? UiText.T("Live captions appear here.") : _lastSource;
         _source.Visibility = _settings.Bilingual ? Visibility.Visible : Visibility.Collapsed;
         UpdateLineHeights();
@@ -258,16 +254,16 @@ public sealed class OverlayWindow : Window
     {
         // Keep both rows inside a manually shortened overlay as well as fitting
         // long sentences horizontally. This changes text scale, not placement.
-        int rows = _previousLine.Visibility == Visibility.Visible ? 2 : 1;
+        int rows = _previousTranslation.Visibility == Visibility.Visible ? 2 : 1;
         double width = Math.Max(1, (ActualWidth > 0 ? ActualWidth : Width) - 38);
         double available = (ActualHeight > 0 ? ActualHeight : Height) - 28 - (rows == 2 ? 6 : 0);
-        foreach (TextBlock extra in new[] { _editHint, _source })
+        foreach (FrameworkElement extra in new FrameworkElement[] { _editHint, _source })
         {
             if (extra.Visibility != Visibility.Visible) continue;
             extra.Measure(new Size(width, double.PositiveInfinity));
             available -= extra.DesiredSize.Height;
         }
-        _previousLine.Height = _currentLine.Height = Math.Max(1,
+        _previousTranslation.Height = _translation.Height = Math.Max(1,
             Math.Min(_translation.FontSize * 1.4, available / rows));
     }
 
@@ -314,15 +310,9 @@ public sealed class OverlayWindow : Window
 
     private static string SingleLine(string text) => Regex.Replace(text, @"\s+", " ").Trim();
 
-    private static TextBlock CreateTranslationText() => new()
+    private static OutlinedCaptionText CreateTranslationText() => new()
     {
-        Foreground = Brushes.White, TextAlignment = TextAlignment.Center,
-        FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.NoWrap
-    };
-
-    private static Viewbox CreateTranslationLine(TextBlock text) => new()
-    {
-        Child = text, Stretch = Stretch.Uniform, StretchDirection = StretchDirection.DownOnly,
+        Foreground = Brushes.White, FontWeight = FontWeights.Bold,
         HorizontalAlignment = HorizontalAlignment.Stretch
     };
 

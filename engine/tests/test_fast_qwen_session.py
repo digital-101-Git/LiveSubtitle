@@ -17,6 +17,7 @@ class Socket:
         self.events = []
         self.caption = asyncio.Event()
         self.error = asyncio.Event()
+        self.recovered = asyncio.Event()
 
     async def send_json(self, event):
         self.events.append(dict(event))
@@ -24,6 +25,8 @@ class Socket:
             self.caption.set()
         if event['type'] == 'error':
             self.error.set()
+        if event.get('code') == 'buffer_recovered':
+            self.recovered.set()
 
 
 class Runtime:
@@ -145,24 +148,62 @@ async def test_stop_cancels_workers_and_late_model_result_does_not_publish():
 
 
 @pytest.mark.asyncio
-async def test_slow_recognition_overrun_is_visible_and_stops_without_partial_caption(monkeypatch):
-    from engine import fast_qwen_session
-    monkeypatch.setattr(fast_qwen_session.FastQwenController, 'maximum_buffer_seconds', 1.2)
+async def test_slow_recognition_overrun_is_visible_and_resumes_with_latest_audio(monkeypatch):
+    controllers, fed = track(monkeypatch)
+    runtime = Runtime()
+    session, socket = session_for(runtime)
+    await session.start()
+    try:
+        for _ in range(4):
+            fed.clear()
+            await session.feed(pcm(1))
+            await asyncio.wait_for(fed.wait(), 2)
+        assert await asyncio.to_thread(runtime.entered.wait, 2)
+        for _ in range(7):
+            fed.clear()
+            await session.feed(pcm(1, 2000))
+            await asyncio.wait_for(fed.wait(), 2)
+        assert session.active and controllers[0].generation == 1
+        assert len(runtime.calls) == 1  # No parallel replacement ASR.
+        assert not runtime.translations
+        await asyncio.wait_for(socket.recovered.wait(), 2)
+        runtime.release.set()
+        await asyncio.wait_for(socket.caption.wait(), 2)
+        assert session.active and len(runtime.calls) == 2
+        assert runtime.calls[1][0] == pcm(.2) + pcm(3.8, 2000)
+        assert runtime.translations == [('続きの日本語。', 'ja')]
+        assert not any(e['type'] == 'error' for e in socket.events)
+        assert any(e['type'] == 'warning' and e.get('code') == 'buffer_recovered'
+                   for e in socket.events)
+    finally:
+        runtime.release.set()
+        await session.stop()
+
+
+@pytest.mark.asyncio
+async def test_input_audio_gap_discards_inflight_result_and_keeps_sample_clock(monkeypatch):
+    controllers, fed = track(monkeypatch)
     runtime = Runtime()
     session, socket = session_for(runtime)
     await session.start()
     try:
         await session.feed(pcm(.4) + pcm(.2, 0))
         assert await asyncio.to_thread(runtime.entered.wait, 2)
-        await session.feed(pcm(.7))
-        await asyncio.wait_for(socket.error.wait(), 2)
-        for _ in range(20):
-            if not session.active:
-                break
-            await asyncio.sleep(.01)
-        assert not session.active
-        assert [e['code'] for e in socket.events if e['type'] == 'error'] == ['fast_qwen_overrun']
-        assert not runtime.translations
+        session.input_gap(160)  # Ten milliseconds of original input was lost.
+        latest = pcm(.4, 2000) + pcm(.5, 0)
+        fed.clear()
+        await session.feed(latest)
+        await asyncio.wait_for(fed.wait(), 2)
+        controller = controllers[0]
+        assert controller.generation == 1 and len(runtime.calls) == 1
+        assert controller._windows[0].start == 9760
+        assert controller._windows[0].pcm == latest
+        assert not controller._windows[0].overlaps_previous
+        runtime.release.set()
+        await asyncio.wait_for(socket.caption.wait(), 2)
+        assert session.active and runtime.calls[1][0] == latest
+        assert runtime.translations == [('続きの日本語。', 'ja')]
+        assert not any(e['type'] == 'error' for e in socket.events)
     finally:
         runtime.release.set()
         await session.stop()

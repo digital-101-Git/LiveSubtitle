@@ -4,7 +4,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace LiveSubtitle.App.Services;
@@ -14,11 +13,10 @@ public sealed class SubtitleSession : IAsyncDisposable
     private readonly ClientWebSocket _socket = new();
     private readonly SemaphoreSlim _writer = new(1, 1);
     private readonly CancellationTokenSource _stop = new();
-    private readonly Channel<byte[]> _audio = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(60) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait });
+    private readonly AudioSendQueue _audio = new();
     private readonly TaskCompletionSource<string> _ready = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private Task? _receiveTask;
     private Task? _sendTask;
-    private int _audioOverrun;
     private int _disposed;
     public string SessionId { get; private set; } = "";
     public event Action<JsonElement>? Event;
@@ -27,6 +25,7 @@ public sealed class SubtitleSession : IAsyncDisposable
 
     public async Task StartAsync(string token, string mode, string language, CancellationToken ct, string targetLanguage = "ko")
     {
+        _audio.ResetSequence();
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct, _stop.Token);
         _socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(15);
         await _socket.ConnectAsync(new Uri($"ws://127.0.0.1:{EngineClient.Port}/v1/stream"), linked.Token);
@@ -40,22 +39,31 @@ public sealed class SubtitleSession : IAsyncDisposable
     public void QueueAudio(byte[] pcm)
     {
         if (Volatile.Read(ref _disposed) != 0 || _stop.IsCancellationRequested || string.IsNullOrEmpty(SessionId)) return;
-        if (_audio.Writer.TryWrite(pcm)) return;
-        if (Interlocked.Exchange(ref _audioOverrun, 1) != 0) return;
-        _audio.Writer.TryComplete();
-        _stop.Cancel();
-        Log?.Invoke(UiText.T("오디오 전송 대기열이 가득 차 자막 세션을 중지합니다."));
-        Error?.Invoke(UiText.T("오디오 전송 대기열이 6초를 초과해 중지했습니다. 음성을 건너뛰지 않도록 연결과 시스템 부하를 확인한 뒤 다시 시작하세요."));
+        _audio.TryWrite(pcm);
     }
 
     private async Task SendAudioAsync(CancellationToken ct)
     {
         try
         {
-            await foreach (byte[] pcm in _audio.Reader.ReadAllAsync(ct))
+            long previousEnd = 0;
+            await foreach (AudioPacket packet in _audio.Reader.ReadAllAsync(ct))
             {
                 await _writer.WaitAsync(ct);
-                try { await _socket.SendAsync(new ArraySegment<byte>(pcm), WebSocketMessageType.Binary, true, ct); }
+                try
+                {
+                    // A held packet may finish sending while later queued PCM is
+                    // dropped. Its capture position keeps the gap at the next
+                    // retained packet, never in front of the packet already held.
+                    long dropped = packet.MissingSamplesBefore(previousEnd);
+                    if (dropped > 0)
+                    {
+                        byte[] gap = JsonSerializer.SerializeToUtf8Bytes(new { type = "audio_gap", dropped_samples = dropped });
+                        await _socket.SendAsync(new ArraySegment<byte>(gap), WebSocketMessageType.Text, true, ct);
+                    }
+                    await _socket.SendAsync(new ArraySegment<byte>(packet.Pcm), WebSocketMessageType.Binary, true, ct);
+                    previousEnd = packet.EndSample;
+                }
                 finally { _writer.Release(); }
             }
         }
@@ -122,7 +130,7 @@ public sealed class SubtitleSession : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
-        _audio.Writer.TryComplete();
+        _audio.Complete();
         _stop.Cancel();
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try

@@ -4,7 +4,6 @@ import pytest
 
 from engine.audio import PCMChunker
 from engine.fast_qwen import FastQwenController
-from engine.settings import EngineError
 
 
 def pcm(seconds, value=1000):
@@ -184,23 +183,108 @@ def test_snapshot_is_immutable_one_request_only_and_stop_ignores_late_output():
     assert controller.next_snapshot() is None and controller.buffered_seconds == 0
 
 
-def test_waiting_audio_overrun_is_explicit_and_does_not_silently_truncate():
+def test_waiting_audio_overrun_drops_oldest_and_ignores_late_result():
     controller = FastQwenController()
     feed(controller, pcm(4))
     snapshot = controller.next_snapshot()
-    with pytest.raises(EngineError) as error:
-        feed(controller, pcm(20))
-    assert error.value.code == 'fast_qwen_overrun'
+    for _ in range(1200):
+        controller.feed(pcm(.1, 2000))
+        assert controller.buffered_seconds <= controller.maximum_buffer_seconds
     assert snapshot.pcm == pcm(4)
-    assert controller.buffered_seconds <= controller.maximum_buffer_seconds
+    assert controller.recognition_pending and controller.next_snapshot() is None
+    assert controller.generation > 0
+    events = controller.pop_recoveries()
+    assert len(events) == 1 and events[0]['stage'] == 'fast_qwen_buffer'
+    assert events[0]['dropped_audio_seconds'] > 110
+    assert events[0]['dropped_items'] > 20
+    assert controller.pop_recoveries() == []
+    assert not controller.accept(snapshot, 'Obsolete audio.').is_final
+    latest = controller.next_snapshot()
+    assert latest.start_sample > 110 * 16000
+    assert not latest.overlaps_previous
+    assert controller.accept(latest, 'Latest speech.').text == 'Latest speech.'
+    assert controller._sample == 124 * 16000
+
+
+def test_recovery_discards_only_required_window_and_keeps_new_packet_exact():
+    controller = FastQwenController()
+    feed(controller, pcm(4))
+    old = controller.next_snapshot()
+    feed(controller, pcm(5.6))
+    assert controller.pop_recoveries() == []
+    assert controller.buffered_seconds == 10
+    controller.feed(pcm(.1, 2000))
+    event, = controller.pop_recoveries()
+    assert event['dropped_items'] == 1
+    assert event['dropped_audio_seconds'] == pytest.approx(3.8)
+    assert [w.identifier for w in controller._windows] == [2, 3]
+    assert controller._windows[0].pcm == pcm(4)
+    assert controller._active.pcm.endswith(pcm(.1, 2000))
+    assert not controller._windows[0].overlaps_previous
+    assert controller._active.overlaps_previous
+    assert controller._sample == round(9.7 * 16000)
+    # Old model output is irrelevant even if it is no longer a valid transcript.
+    assert not controller.accept(old, None).is_final
+    assert controller.next_snapshot().window_id == 2
 
 
 def test_many_short_waiting_windows_have_separate_bound():
     controller = FastQwenController()
-    with pytest.raises(EngineError) as error:
-        for _ in range(20):
-            feed(controller, pcm(.2) + pcm(.5, 0))
-    assert error.value.code == 'fast_qwen_overrun'
+    for _ in range(20):
+        feed(controller, pcm(.2) + pcm(.5, 0))
+        assert len(controller._windows) <= controller.maximum_windows
+        assert controller.buffered_seconds <= controller.maximum_buffer_seconds
+    event, = controller.pop_recoveries()
+    assert event['stage'] == 'fast_qwen_windows' and event['dropped_items'] == 12
+    assert [w.identifier for w in controller._windows] == list(range(13, 21))
+    assert controller.next_snapshot().window_id == 13
+
+
+def test_input_gap_resets_state_and_advances_exact_subframe_clock():
+    class Detector:
+        def __init__(self):
+            self.resets = 0
+
+        def __call__(self, frame):
+            return False
+
+        def reset(self):
+            self.resets += 1
+
+    detector = Detector()
+    controller = FastQwenController(voiced_detector=detector)
+    feed(controller, pcm(.4) + pcm(.2, 0))
+    early = controller.next_snapshot()
+    controller.feed(pcm(.01, 2000))
+    controller.reset_for_gap(dropped_samples=123)
+    assert controller._sample == 9600 + 160 + 123
+    assert controller.generation == 1 and detector.resets == 1
+    assert controller.buffered_seconds == 0
+    assert not controller._pending_continuation and not controller._prefix
+    assert controller.next_snapshot() is None  # Do not launch a second model call.
+    new_pcm = pcm(.4, 3000) + pcm(.5, 0)
+    feed(controller, new_pcm)
+    assert not controller.accept(early, 'Old guess.').is_final
+    new = controller.next_snapshot()
+    assert new.start_sample == 9883 and new.pcm == new_pcm
+    assert not new.overlaps_previous and new.cached_text is None
+    assert controller.accept(new, 'New speech.').is_final
+
+
+def test_recovery_at_hard_cut_accounts_for_new_overlap_without_exceeding_bound():
+    controller = FastQwenController()
+    # Incoming samples fit, but the hard-cut's new overlap needs extra space.
+    controller.maximum_buffer_seconds = 4.1
+    feed(controller, pcm(4))
+    assert controller.buffered_seconds <= 4.1
+    assert controller.generation == 1
+    assert controller._active.pcm == pcm(.2)
+    assert not controller._active.overlaps_previous
+    event, = controller.pop_recoveries()
+    assert event['dropped_audio_seconds'] == pytest.approx(3.8)
+    feed(controller, pcm(.02, 2000) + pcm(.5, 0))
+    final = controller.next_snapshot()
+    assert final.pcm == pcm(.2) + pcm(.02, 2000) + pcm(.5, 0)
 
 
 def test_end_of_stream_keeps_unframed_tail_and_invalidates_cache():

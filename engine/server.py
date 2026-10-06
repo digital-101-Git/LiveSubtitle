@@ -205,6 +205,10 @@ def create_app(root: Path, runtime=None) -> FastAPI:
                         session = StreamSession(websocket, runtime, manager, settings, mode, language,
                                                 target_language=target_language)
                         await session.start()
+                elif message.get("type") == "audio_gap":
+                    if session is None or not session.active:
+                        raise EngineError("not_started", "오디오 전송 전에 자막 세션을 시작해 주세요.", 409)
+                    session.input_gap(message.get("dropped_samples"))
                 elif message.get("type") == "stop":
                     if session and session.active:
                         await session.stop()

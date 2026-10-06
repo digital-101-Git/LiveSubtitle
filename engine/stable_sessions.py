@@ -15,7 +15,7 @@ from .settings import EngineError
 from .streaming_sentences import SentenceUpdate
 
 
-async def drive(session, controller, next_snapshot, recognize, accept):
+async def drive(session, controller, next_snapshot, recognize, accept, *, on_audio_gap=None, on_feed=None):
     """Feed while an immutable snapshot is on the GPU; never parallelize ASR.
 
     Both workers mutate controller state only on this event loop. Cancellation
@@ -23,24 +23,52 @@ async def drive(session, controller, next_snapshot, recognize, accept):
     Translation backpressure cannot pause ingestion until its explicit bound.
     """
     changed = asyncio.Event()
+    generation = getattr(session, "audio_generation", 0)
+    dropped_samples = getattr(session, "audio_dropped_samples", 0)
+
+    def check_gap(pcm=None):
+        nonlocal generation, dropped_samples
+        current = getattr(session, "audio_generation", 0)
+        if current == generation:
+            return
+        total = session.audio_dropped_samples
+        if on_audio_gap is None:
+            if pcm is not None:
+                session.defer_audio(pcm)
+            error = EngineError("audio_gap_restart", "음성 입력 구간을 건너뛰고 인식을 다시 연결합니다.")
+            error.buffer_seconds = getattr(controller, "buffered_seconds", 0)
+            raise error
+        on_audio_gap(total - dropped_samples)
+        generation, dropped_samples = current, total
 
     async def ingest():
         while session.active:
-            pcm = await session.audio.get()
+            pcm = await (session.next_audio() if hasattr(session, "next_audio") else session.audio.get())
             if not session.active:
                 return
-            controller.feed(pcm)
+            check_gap(pcm)
+            try:
+                controller.feed(pcm)
+            except EngineError as exc:
+                exc.buffer_seconds = getattr(controller, "buffered_seconds", 0)
+                raise
+            if on_feed is not None:
+                on_feed()
             changed.set()
 
     async def infer():
         while session.active:
             await changed.wait()
             changed.clear()
+            check_gap()
             while session.active and (snapshot := next_snapshot()) is not None:
                 began = time.monotonic()
                 result = await recognize(snapshot)
                 if not session.active:
                     return
+                if hasattr(session, "record_timing"):
+                    session.record_timing("asr", time.monotonic() - began)
+                check_gap()
                 await accept(snapshot, result, time.monotonic() - began)
 
     workers = [asyncio.create_task(ingest(), name="streaming-pcm-ingest"),

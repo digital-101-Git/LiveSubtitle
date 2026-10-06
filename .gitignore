@@ -19,6 +19,13 @@
 !/0_UserManual(사용자매뉴얼)/
 !/models/
 
+# Publish reviewed test reports, not raw recordings or experiment logs.
+!/docs/
+/docs/*
+!/docs/tests/
+/docs/tests/*
+!/docs/tests/*.md
+
 # Include verified metadata only, never model weights.
 /models/*
 !/models/asr/

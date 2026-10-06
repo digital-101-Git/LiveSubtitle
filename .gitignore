@@ -8,6 +8,7 @@
 !/.github/CODEOWNERS
 !/LICENSE
 !/README.md
+!/LiveSubtitle.md
 !/README.txt
 !/SOURCE_RELEASE.txt
 !/THIRD_PARTY_NOTICES.txt
@@ -18,13 +19,6 @@
 !/engine/
 !/0_UserManual(사용자매뉴얼)/
 !/models/
-
-# Publish reviewed test reports, not raw recordings or experiment logs.
-!/docs/
-/docs/*
-!/docs/tests/
-/docs/tests/*
-!/docs/tests/*.md
 
 # Include verified metadata only, never model weights.
 /models/*

@@ -85,6 +85,12 @@ class FastQwenController:
         self._stopped = False
         self._finished = False
         self._pending_continuation = False
+        self.generation = 0
+        self._discard_request = False
+        self._gap_before_next = False
+        # Coalesce by the two bounds so an unconsumed diagnostic queue cannot
+        # itself grow while a recognition worker is blocked.
+        self._recoveries = {}
         self.statistics = {"speculative_requests": 0, "cache_reuses": 0,
                            "stale_speculation": 0, "rms_endpoints": 0,
                            "neural_endpoints": 0, "maximum_endpoints": 0}
@@ -98,18 +104,103 @@ class FastQwenController:
     def recognition_pending(self):
         return self._request is not None
 
+    def pop_recoveries(self):
+        recoveries = list(self._recoveries.values())
+        self._recoveries.clear()
+        return recoveries
+
+    @staticmethod
+    def _range_samples(ranges):
+        total, frontier = 0, -1
+        for start, end in sorted(ranges):
+            total += max(0, end - max(start, frontier))
+            frontier = max(frontier, end)
+        return total
+
+    def _record_recovery(self, stage, removed, *, extra_samples=0):
+        if not removed and not extra_samples:
+            return
+        lost = [(window.start, window.end) for window in removed]
+        kept = [(window.start, window.end) for window in self._windows]
+        kept.extend((start, start + len(frame)//2) for start, frame in self._prefix)
+        # Forced-cut overlap is one original audio interval, not two losses.
+        intersections = [(max(a, c), min(b, d)) for a, b in lost for c, d in kept
+                         if max(a, c) < min(b, d)]
+        samples = self._range_samples(lost) - self._range_samples(intersections) + extra_samples
+        event = self._recoveries.setdefault(stage, {
+            "stage": stage, "dropped_audio_seconds": 0.0,
+            "dropped_items": 0, "buffer_seconds": 0.0})
+        event["dropped_audio_seconds"] += samples / 16000
+        event["dropped_items"] += len(removed)
+        event["buffer_seconds"] = self.buffered_seconds
+
+    def _drop_oldest(self):
+        window = self._windows.popleft()
+        if self._request is not None and self._request.window_id == window.identifier:
+            # Keep the outstanding slot occupied until its worker returns.
+            self._discard_request = True
+        if self._active is window:
+            self._active = None
+            self._pending_continuation = False
+        return window
+
+    def _recover(self, stage, *, incoming_bytes=0):
+        removed = []
+        while self._windows and (
+                len(self._windows) > self.maximum_windows
+                or self.buffered_seconds + incoming_bytes / 32000 > self.maximum_buffer_seconds):
+            removed.append(self._drop_oldest())
+        if not removed:
+            return
+        self.generation += 1
+        if self._windows:
+            self._windows[0].overlaps_previous = False
+        else:
+            self._gap_before_next = True
+        self._record_recovery(stage, removed)
+
+    def reset_for_gap(self, dropped_samples=0):
+        """Forget pre-gap audio without rewinding the original input clock."""
+        if not isinstance(dropped_samples, int) or dropped_samples < 0:
+            raise ValueError("Expected a nonnegative number of dropped samples.")
+        pending_samples = len(self._pending) // 2
+        removed = list(self._windows)
+        prefix_samples = self._range_samples((start, start + len(frame)//2)
+                                            for start, frame in self._prefix)
+        # Prefix can duplicate the final silence of a waiting window.
+        overlap = self._range_samples((max(w.start, start), min(w.end, start + len(frame)//2))
+            for w in removed for start, frame in self._prefix
+            if max(w.start, start) < min(w.end, start + len(frame)//2))
+        self._windows.clear()
+        self._active = None
+        self._prefix.clear()
+        self._pending.clear()
+        self._pending_continuation = False
+        self._gap_before_next = True
+        self._discard_request = self._request is not None
+        self._sample += dropped_samples + pending_samples
+        self.generation += 1
+        reset = getattr(self.voiced_detector, "reset", None)
+        if reset is not None:
+            reset()
+        self._record_recovery("fast_qwen_buffer", removed,
+                              extra_samples=prefix_samples - overlap + pending_samples)
+
     def _rms_voice(self, pcm):
         samples = struct.unpack(f"<{len(pcm)//2}h", pcm)
         return math.sqrt(sum(value * value for value in samples) / len(samples)) / 32768 >= self.threshold
 
     def _new_window(self, start, pcm=b"", overlaps_previous=False, *, continuation=False):
-        if len(self._windows) >= self.maximum_windows:
-            raise EngineError("fast_qwen_overrun", "처리 대기 중인 음성 구간이 너무 많습니다. 다시 시작해 주세요.")
+        if self._gap_before_next:
+            overlaps_previous = False
+            self._gap_before_next = False
         window = _Window(self._next_id, start, bytearray(pcm), overlaps_previous,
                          continuation=continuation)
         self._next_id += 1
         self._windows.append(window)
         self._active = window
+        stage = "fast_qwen_windows" if len(self._windows) > self.maximum_windows else "fast_qwen_buffer"
+        self._recover(stage)
         return window
 
     def feed(self, pcm):
@@ -119,8 +210,7 @@ class FastQwenController:
             raise RuntimeError("Audio has already ended.")
         if not isinstance(pcm, (bytes, bytearray)) or len(pcm) % 2 or len(pcm) > 32000:
             raise ValueError("Expected at most one second of complete PCM16 samples.")
-        if self.buffered_seconds + len(pcm) / 32000 > self.maximum_buffer_seconds:
-            raise EngineError("fast_qwen_overrun", "음성 인식이 입력 속도를 따라가지 못했습니다. 다시 시작해 주세요.")
+        self._recover("fast_qwen_buffer", incoming_bytes=len(pcm))
         self._pending.extend(pcm)
         while len(self._pending) >= self.frame_bytes:
             frame = bytes(self._pending[:self.frame_bytes])
@@ -134,11 +224,11 @@ class FastQwenController:
                     self._pending_continuation = False
                     self._prefix.append((start, frame))
                     continue
-                self._new_window(self._prefix[0][0] if self._prefix else start,
-                                 b"".join(item for _, item in self._prefix),
-                                 continuation=self._pending_continuation)
-                self._pending_continuation = False
+                prefix_start = self._prefix[0][0] if self._prefix else start
+                prefix = b"".join(item for _, item in self._prefix)
                 self._prefix.clear()
+                self._new_window(prefix_start, prefix, continuation=self._pending_continuation)
+                self._pending_continuation = False
             window = self._active
             # A forced carry is a continuation only if new speech directly
             # follows the cut. Preserve a captured short tail through its
@@ -167,6 +257,8 @@ class FastQwenController:
                 self._close(window, reason)
             elif len(window.pcm) / 32000 >= self.maximum_window_seconds:
                 self._close(window, "maximum_window")
+        # A silence endpoint can add a copied prefix after the admission check.
+        self._recover("fast_qwen_buffer")
 
     def _close(self, window, reason):
         window.closed, window.reason = True, reason
@@ -233,6 +325,9 @@ class FastQwenController:
         if snapshot is not self._request:
             raise RuntimeError("Recognition does not belong to the outstanding snapshot.")
         self._request = None
+        if self._discard_request:
+            self._discard_request = False
+            return FastResult()
         if not isinstance(text, str) or len(text) > 6000:
             raise EngineError("transcript_too_long", "음성 인식 결과의 길이가 올바르지 않습니다.")
         window = self._windows[0]
@@ -276,3 +371,5 @@ class FastQwenController:
         self._windows.clear()
         self._prefix.clear()
         self._pending.clear()
+        self._recoveries.clear()
+        self._discard_request = False

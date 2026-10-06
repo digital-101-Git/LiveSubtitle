@@ -5,6 +5,7 @@ import asyncio
 import base64
 import json
 import logging
+import time
 import uuid
 from dataclasses import dataclass
 from urllib.parse import quote
@@ -16,6 +17,7 @@ from .local_streaming import LocalWhisperStreaming
 from .sentences import split_sentences
 from .streaming_sentences import StreamingSentences, SentenceUpdate
 from .settings import EngineError, normalize_language, normalize_target_language
+from .recovery_log import RecoveryLog
 
 
 @dataclass
@@ -26,6 +28,7 @@ class Translation:
     revision: int = 1
     result: str | None = None
     failed: bool = False
+    context_epoch: int = 0
 
 
 class SessionManager:
@@ -34,6 +37,7 @@ class SessionManager:
         self.lock = asyncio.Lock()
         self.history = history
         self._history_task: asyncio.Task | None = None
+        self.log_epoch = 0
 
     def record_caption(self, session: StreamSession, event: dict) -> None:
         if self.history is None or event.get("type") not in {"caption", "caption_remove"}:
@@ -66,6 +70,7 @@ class SessionManager:
             await asyncio.shield(self._history_task)
 
     async def clear_logs(self, log_lock) -> dict:
+        self.log_epoch += 1  # Pending diagnostic writes must not restore cleared records.
         # Install the barrier before yielding. Earlier queued writes finish
         # before deletion; subsequent captions wait for it and start a fresh log.
         previous = self._history_task
@@ -118,6 +123,7 @@ class StreamSession:
         self._removed_segments: set[int] = set()
         self._revisions: dict[int, int] = {}
         self._context: dict[int, str] = {}
+        self._context_epoch = 0
         self._sentence_order: dict[int, tuple[int, int]] = {}
         self._turn = 0
         self.tasks: list[asyncio.Task] = []
@@ -125,6 +131,98 @@ class StreamSession:
         self.segment = 0
         self.gemini = None
         self._history_warning_sent = False
+        self._deferred_audio: bytes | None = None
+        self._asr_generation = 0
+        self._translation_inflight: tuple[int, Translation] | None = None
+        self._timings = {"asr_seconds": 0.0, "translation_seconds": 0.0}
+        self._recovery_pending: dict[str, dict] = {}
+        self._recovery_ready = asyncio.Event()
+        self._recovery_log = (RecoveryLog(runtime.root, lock=getattr(runtime, "log_lock", None))
+                              if hasattr(runtime, "root") else None)
+
+    @property
+    def audio_generation(self):
+        return self.audio.generation
+
+    @property
+    def audio_dropped_samples(self):
+        return self.audio.dropped_bytes // 2
+
+    async def next_audio(self):
+        if self._deferred_audio is not None:
+            pcm, self._deferred_audio = self._deferred_audio, None
+            return pcm
+        return await self.audio.get()
+
+    def defer_audio(self, pcm):
+        if self._deferred_audio is not None:
+            raise RuntimeError("Only one audio packet may be deferred.")
+        self._deferred_audio = pcm
+
+    def _check_audio_generation(self):
+        if self.audio_generation != self._asr_generation:
+            raise EngineError("audio_gap_restart", "음성 입력 구간을 건너뛰고 인식을 다시 연결합니다.")
+
+    async def _next_local_audio(self):
+        pcm = await self.next_audio()
+        if self.audio_generation != self._asr_generation:
+            self.defer_audio(pcm)
+            self._check_audio_generation()
+        return pcm
+
+    def record_timing(self, stage, seconds):
+        key = stage + "_seconds"
+        if key in self._timings:
+            self._timings[key] = max(0.0, seconds)
+
+    def break_audio_context(self):
+        self._context.clear()
+        self._context_epoch += 1
+
+    def report_overload(self, reason, *, dropped_audio_seconds=0.0, dropped_items=0,
+                        buffer_seconds=0.0):
+        """Coalesce diagnostics without blocking capture, inference or creating tasks."""
+        stage = "input" if reason == "input" else "translation" if reason == "translation" else "asr"
+        epoch = self.manager.log_epoch
+        previous = self._recovery_pending.get(stage)
+        if previous is None or previous["epoch"] != epoch:
+            previous = {"epoch": epoch, "session_id": self.id, "stage": stage,
+                        "code": {"input": "input_backlog_dropped", "asr": "asr_backlog_dropped",
+                                 "translation": "translation_backlog_dropped"}[stage],
+                        "dropped_audio_seconds": 0.0, "dropped_items": 0, "buffer_seconds": 0.0}
+            self._recovery_pending[stage] = previous
+        previous["dropped_audio_seconds"] += max(0.0, dropped_audio_seconds)
+        previous["dropped_items"] += max(0, dropped_items)
+        previous["buffer_seconds"] = max(previous["buffer_seconds"], buffer_seconds)
+        previous.update(self._timings, queue_items=(self.audio.queue.qsize() if stage == "input" else self.texts.qsize()))
+        self._recovery_ready.set()
+
+    async def _recovery_reports(self):
+        last_notice = float("-inf")
+        while self.active:
+            await self._recovery_ready.wait()
+            self._recovery_ready.clear()
+            reports = list(self._recovery_pending.values())
+            self._recovery_pending.clear()
+            for report in reports:
+                epoch = report.pop("epoch")
+                if self._recovery_log is not None:
+                    # Respect the same clear/write barrier as caption history.
+                    barrier = self.manager._history_task
+                    if barrier is not None:
+                        await asyncio.shield(barrier)
+                    def write_current(report=report, epoch=epoch):
+                        with self._recovery_log.lock:
+                            if epoch == self.manager.log_epoch:
+                                self._recovery_log.write(report)
+                    try:
+                        await asyncio.to_thread(write_current)
+                    except (OSError, ValueError):
+                        pass  # Diagnostics must not stop captions or disclose payloads.
+            if self.active and time.monotonic() - last_notice >= 2:
+                last_notice = time.monotonic()
+                await self.emit({"type": "warning", "code": "buffer_recovered",
+                    "message": "처리가 지연되어 일부 구간을 건너뛰었습니다. 최신 입력부터 자막을 계속 처리합니다."})
 
     async def _send_locked(self, event: dict) -> None:
         payload = {"session_id": self.id, **event, "target_language": self.target_language}
@@ -150,19 +248,20 @@ class StreamSession:
             if self.mode == "gemini":
                 await self._open_gemini()
             await self.emit({"type": "ready"})
-            self.tasks.append(asyncio.create_task(self._guard(self._translate()), name="subtitle-translation"))
+            self.tasks.append(asyncio.create_task(self._guard(self._recovery_reports), name="buffer-recovery-log"))
+            self.tasks.append(asyncio.create_task(self._guard(self._translate), name="subtitle-translation"))
             if self.mode == "local":
-                self.tasks.append(asyncio.create_task(self._guard(self._local()), name="local-audio"))
+                self.tasks.append(asyncio.create_task(self._guard(self._local), name="local-audio"))
             else:
-                self.tasks.append(asyncio.create_task(self._guard(self._gemini_send()), name="gemini-send"))
-                self.tasks.append(asyncio.create_task(self._guard(self._gemini_receive()), name="gemini-receive"))
+                self.tasks.append(asyncio.create_task(self._guard(self._gemini_send), name="gemini-send"))
+                self.tasks.append(asyncio.create_task(self._guard(self._gemini_receive), name="gemini-receive"))
         except BaseException:
             await self.stop(notify=False)
             raise
 
     async def _guard(self, coroutine) -> None:
         try:
-            await coroutine
+            await (coroutine() if callable(coroutine) else coroutine)
         except asyncio.CancelledError:
             raise
         except Exception as exc:
@@ -177,12 +276,32 @@ class StreamSession:
             raise EngineError("session_stopped", "자막 세션이 중지되어 있습니다.", 409)
         if not data or len(data) % 2 or len(data) > 32000:
             raise EngineError("invalid_audio", "오디오는 16kHz mono PCM16LE, 메시지당 최대 1초여야 합니다.")
-        try:
-            self.audio.put_nowait(data)
-        except asyncio.QueueFull as exc:
-            raise EngineError("audio_overrun", "오디오 대기 버퍼가 가득 차 중지했습니다. 다른 GPU 작업을 줄이고 다시 시작해 주세요.", 409) from exc
+        dropped = self.audio.put_latest(data)
+        if dropped:
+            # A restart may have parked an older packet outside AudioQueue.
+            # A second gap must not splice that packet into the newest audio.
+            deferred = len(self._deferred_audio or b"")
+            self._deferred_audio = None
+            self.audio.note_gap(deferred)
+            dropped += deferred
+            self.report_overload("input", dropped_audio_seconds=dropped / 32000,
+                                 buffer_seconds=self.audio.bytes / 32000)
+
+    def input_gap(self, dropped_samples: int) -> None:
+        if type(dropped_samples) is not int or not 0 < dropped_samples <= 16000 * 3600:
+            raise EngineError("invalid_audio_gap", "오디오 건너뛰기 길이가 올바르지 않습니다.")
+        if not self.active:
+            raise EngineError("session_stopped", "자막 세션이 중지되어 있습니다.", 409)
+        # Pending server-side PCM precedes the client-side gap. Do not splice it
+        # into the fresh input after a controller reset.
+        queued = self.audio.discard_pending()
+        deferred = len(self._deferred_audio or b"")
+        self._deferred_audio = None
+        self.audio.note_gap(dropped_samples * 2 + deferred)
+        self.report_overload("input", dropped_audio_seconds=(queued + deferred) / 32000 + dropped_samples / 16000)
 
     async def _final(self, text: str, language: str) -> None:
+        context_epoch = self._context_epoch
         text = text.strip()
         if not text or not self.active:
             return
@@ -196,14 +315,22 @@ class StreamSession:
                 return
             self.segment += 1
             self._sentence_order[self.segment] = (self.segment, 0)
-            await self._queue_translation(self.segment, sentence, language, True)
+            await self._queue_translation(self.segment, sentence, language, True,
+                                          context_epoch=context_epoch)
 
-    async def _queue_translation(self, segment: int, source: str, language: str, is_final: bool) -> bool:
+    async def _queue_translation(self, segment: int, source: str, language: str, is_final: bool,
+                                 *, context_epoch: int | None = None) -> bool:
+        # Capture before any send/queue await. Recovery may happen while this
+        # accepted ASR result is being split or published; its age cannot change.
+        if context_epoch is None:
+            context_epoch = self._context_epoch
         if segment in self._removed_segments or (not is_final and segment in self._final_segments):
             return True  # Retired updates must not be retried.
         previous = self._translations.get(segment)
         await self.emit({"type": "transcript", "segment_id": segment, "text": source,
                          "is_final": is_final, "preview": self.mode == "local"})
+        if not self.active or segment in self._removed_segments:
+            return True
         if (self.mode == "local" and not is_final
                 and (self.texts.full() or any(
                     key != segment and work.is_final and work.result is None
@@ -227,15 +354,45 @@ class StreamSession:
             return True
         revision = self._revisions.get(segment, 0) + 1
         self._revisions[segment] = revision
-        work = Translation(source, language, is_final, revision)
+        work = Translation(source, language, is_final, revision, context_epoch=context_epoch)
         self._translations[segment] = work
         self._context.pop(segment, None)
         self._prune_stale_translations()
-        try:
-            await asyncio.wait_for(self.texts.put((segment, work)), 10)
-        except TimeoutError as exc:
-            raise EngineError("translation_overrun", "번역 처리가 밀려 중지했습니다. 다른 GPU 작업을 줄이거나 더 작은 번역 모델을 선택해 주세요.", 409) from exc
+        # A provider can deliver several sentences at once. Give an ordinary
+        # short burst one scheduling/translation interval before losing speech.
+        if self.texts.full():
+            try:
+                await asyncio.wait_for(self.texts.put((segment, work)), .25)
+                return True
+            except TimeoutError:
+                if not self.active or self._translations.get(segment) is not work:
+                    return True
+                self._prune_stale_translations()
+        retired = []
+        while self.texts.full():
+            old_segment, old_work = self.texts.get_nowait()
+            self.texts.task_done()
+            if self._translations.get(old_segment) is old_work:
+                self._retire_translation(old_segment, old_work)
+                retired.append(old_segment)
+                inflight = self._translation_inflight
+                if (inflight is not None and self._translations.get(inflight[0]) is inflight[1]
+                        and (inflight[1].context_epoch, self._sentence_order.get(inflight[0], (inflight[0], 0)))
+                        <= (old_work.context_epoch, self._sentence_order.get(old_segment, (old_segment, 0)))):
+                    self._retire_translation(*inflight)
+                    retired.append(inflight[0])
+        self.texts.put_nowait((segment, work))
+        if retired:
+            self.report_overload("translation", dropped_items=len(retired))
+            for identifier in retired:
+                await self.emit({"type": "caption_remove", "segment_id": identifier})
         return True
+
+    def _retire_translation(self, segment, work):
+        if self._translations.get(segment) is work:
+            self._translations.pop(segment, None)
+            self._context.pop(segment, None)
+            self._removed_segments.add(segment)
 
     def _prune_stale_translations(self) -> None:
         # Revisions of one sentence must not occupy all six queue slots. This
@@ -251,6 +408,7 @@ class StreamSession:
             self.texts.put_nowait(item)
 
     async def _apply_sentences(self, updates: list[SentenceUpdate], language: str | None = None) -> list[SentenceUpdate]:
+        context_epoch = self._context_epoch
         language = language if self.language == "auto" and language else self.language
         deferred = []
         for update in updates:
@@ -265,7 +423,8 @@ class StreamSession:
                 self._prune_stale_translations()
                 await self.emit({"type": "caption_remove", "segment_id": update.segment_id})
             else:
-                if not await self._queue_translation(update.segment_id, update.text, language, update.is_final):
+                if not await self._queue_translation(update.segment_id, update.text, language, update.is_final,
+                                                     context_epoch=context_epoch):
                     deferred.append(update)
         return deferred
 
@@ -286,6 +445,29 @@ class StreamSession:
                     "message": "한 문장의 번역을 완료하지 못했습니다. 원문은 최근 자막에 남기고 다음 문장을 계속 처리합니다."}), 5)
 
     async def _local(self) -> None:
+        recoverable = {"audio_gap_restart", "local_streaming_overrun", "qwen_streaming_overrun",
+                       "alignatt_audio_overrun", "fast_qwen_overrun"}
+        while self.active:
+            self._asr_generation = self.audio_generation
+            try:
+                await self._local_once()
+                return
+            except EngineError as exc:
+                if exc.code not in recoverable or not self.active:
+                    raise
+                self.break_audio_context()
+                provisional = [(identifier, work) for identifier, work in self._translations.items()
+                               if not work.is_final]
+                for identifier, work in provisional:
+                    self._retire_translation(identifier, work)
+                self._prune_stale_translations()
+                for identifier, _ in provisional:
+                    await self.emit({"type": "caption_remove", "segment_id": identifier})
+                seconds = getattr(exc, "buffer_seconds", 0.0)
+                self.report_overload("asr", dropped_audio_seconds=seconds, buffer_seconds=seconds)
+                await asyncio.sleep(0)
+
+    async def _local_once(self) -> None:
         profile = self.settings.data.get("asr_profile", "legacy")
         if profile == "alignatt":
             from .stable_sessions import alignatt
@@ -313,11 +495,12 @@ class StreamSession:
             return
         chunker, previous = PCMChunker(), ""
         while self.active:
-            pcm = await self.audio.get()
+            pcm = await self._next_local_audio()
             for piece in chunker.feed(pcm):
                 if not self.active:
                     return
                 text, language = await asyncio.to_thread(self.runtime.transcribe, piece.pcm, self.language)
+                self._check_audio_generation()
                 if not self.active:
                     return
                 raw_text = text
@@ -335,7 +518,7 @@ class StreamSession:
         draft = ""
         draft_language = self.language
         while self.active:
-            pcm = await self.audio.get()
+            pcm = await self._next_local_audio()
             if not self.active:
                 return
             chunker.feed(pcm)
@@ -343,6 +526,7 @@ class StreamSession:
                 try:
                     text, language = await asyncio.to_thread(
                         self.runtime.transcribe, request.pcm, self.language)
+                    self._check_audio_generation()
                 except EngineError as exc:
                     # A bounded second decode may fail even though the first
                     # result was usable. Never turn a stopped/failed session
@@ -386,19 +570,28 @@ class StreamSession:
         loop = asyncio.get_running_loop()
         prompt, window_id = "", None
         while self.active:
-            pcm = await self.audio.get()
+            pcm = await self._next_local_audio()
             if not self.active:
                 return
-            streaming.feed(pcm)
+            try:
+                streaming.feed(pcm)
+            except EngineError as exc:
+                exc.buffer_seconds = streaming.buffered_seconds
+                raise
             while self.active and (snapshot := streaming.snapshot()) is not None:
                 if snapshot.window_id != window_id:
                     prompt, window_id = "", snapshot.window_id
                 words, language = await asyncio.to_thread(
                     self.runtime.transcribe_stream, snapshot.pcm, self.language,
                     "" if getattr(snapshot, "context_in_audio", False) else prompt)
+                self._check_audio_generation()
                 if not self.active:
                     return
-                result = streaming.accept(snapshot, words)
+                try:
+                    result = streaming.accept(snapshot, words)
+                except EngineError as exc:
+                    exc.buffer_seconds = streaming.buffered_seconds
+                    raise
                 if result.committed_text:
                     prompt = (prompt + " " + result.committed_text).strip()[-500:]
                 if getattr(result, "reset_prompt", False):
@@ -429,15 +622,17 @@ class StreamSession:
     async def _translate(self) -> None:
         while self.active:
             segment, work = await self.texts.get()
+            self._translation_inflight = (segment, work)
             try:
                 await self._translate_sentence(segment, work)
             finally:
+                self._translation_inflight = None
                 self.texts.task_done()
 
     def _remember_context(self, segment: int, work: Translation) -> None:
         # Provisional recognizer output can still change. Only successful final
         # source text may influence the next sentence, never model-generated text.
-        if not work.is_final or work.failed:
+        if not work.is_final or work.failed or work.context_epoch != self._context_epoch:
             return
         self._context[segment] = work.source
         ordered = sorted(self._context, key=self._sentence_order.__getitem__)
@@ -448,9 +643,11 @@ class StreamSession:
             return
         order = self._sentence_order[segment]
         ordered = sorted(self._context, key=self._sentence_order.__getitem__)
-        context = [self._context[key] for key in ordered if self._sentence_order[key] < order][-3:]
+        context = ([self._context[key] for key in ordered if self._sentence_order[key] < order][-3:]
+                   if work.context_epoch == self._context_epoch else [])
         while self.active and self._translations.get(segment) is work:
             began_final = work.is_final
+            began = time.monotonic()
             try:
                 work.result = await self.runtime.translate(work.source, work.language, context,
                                                            target_language=self.target_language)
@@ -477,6 +674,8 @@ class StreamSession:
                 await self._caption(segment, work)
                 await self._translation_warning(segment, work, exc.code)
                 break
+            finally:
+                self.record_timing("translation", time.monotonic() - began)
             if not self.active or self._translations.get(segment) is not work:
                 return
             self._remember_context(segment, work)

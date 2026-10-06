@@ -140,6 +140,40 @@ def test_invalid_pcm_stops_session(service):
         assert ws.receive_json()["code"] == "invalid_audio"
 
 
+def test_client_audio_gap_keeps_session_and_processes_following_speech(service):
+    client, app, _ = service
+    with client.websocket_connect("/v1/stream") as ws:
+        session_id = start(ws, app.state.settings.token)
+        ws.send_json({"type": "audio_gap", "dropped_samples": 1600})
+        voice = struct.pack("<320h", *([1000, -1000] * 160))
+        ws.send_bytes(voice * 40)
+        ws.send_bytes(b"\0" * (640 * 30))
+        while True:
+            message = ws.receive_json()
+            assert message["type"] not in {"error", "stopped"}
+            assert message["session_id"] == session_id
+            if message["type"] == "caption":
+                assert message["text"] == "한국어 자막"
+                break
+        assert app.state.sessions.active.audio_dropped_samples == 1600
+        ws.send_json({"type": "stop"})
+        while ws.receive_json()["type"] != "stopped":
+            pass
+
+
+@pytest.mark.parametrize("started, count, code", [
+    (False, 1600, "not_started"), (True, True, "invalid_audio_gap")])
+def test_client_audio_gap_requires_active_session_and_valid_count(service, started, count, code):
+    client, app, _ = service
+    with client.websocket_connect("/v1/stream") as ws:
+        if started:
+            start(ws, app.state.settings.token)
+        else:
+            ws.send_json({"type": "auth", "token": app.state.settings.token})
+        ws.send_json({"type": "audio_gap", "dropped_samples": count})
+        assert ws.receive_json()["code"] == code
+
+
 @pytest.mark.asyncio
 async def test_audio_queue_enforces_bytes_and_recovers_after_read():
     queue = AudioQueue(max_bytes=8, max_items=10)

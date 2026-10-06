@@ -15,6 +15,8 @@ class AudioQueue:
         self.queue: asyncio.Queue[bytes] = asyncio.Queue(max_items)
         self.max_bytes = max_bytes
         self.bytes = 0
+        self.generation = 0
+        self.dropped_bytes = 0
 
     def put_nowait(self, value: bytes) -> None:
         if self.bytes + len(value) > self.max_bytes:
@@ -22,9 +24,39 @@ class AudioQueue:
         self.queue.put_nowait(value)
         self.bytes += len(value)
 
+    def put_latest(self, value: bytes) -> int:
+        """Retain the newest packet, evicting only enough oldest queued PCM."""
+        if len(value) > self.max_bytes:
+            raise ValueError("Audio packet exceeds queue capacity.")
+        dropped = 0
+        while self.bytes + len(value) > self.max_bytes or self.queue.full():
+            old = self.queue.get_nowait()
+            self.queue.task_done()
+            self.bytes -= len(old)
+            dropped += len(old)
+        if dropped:
+            self.note_gap(dropped)
+        self.put_nowait(value)
+        return dropped
+
+    def note_gap(self, dropped_bytes: int) -> None:
+        if dropped_bytes:
+            self.generation += 1
+            self.dropped_bytes += dropped_bytes
+
+    def discard_pending(self) -> int:
+        dropped = self.bytes
+        while not self.queue.empty():
+            self.queue.get_nowait()
+            self.queue.task_done()
+        self.bytes = 0
+        self.note_gap(dropped)
+        return dropped
+
     async def get(self) -> bytes:
         item = await self.queue.get()
         self.bytes -= len(item)
+        self.queue.task_done()
         return item
 
 

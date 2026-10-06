@@ -13,6 +13,23 @@ async def run(session):
                 if hasattr(session.runtime, "create_voice_detector") else None)
     controller = FastQwenController(voiced_detector=detector)
     previous = ""
+    previous_generation = controller.generation
+
+    def drain_recoveries():
+        nonlocal previous, previous_generation
+        if previous_generation != controller.generation:
+            previous = ""
+            previous_generation = controller.generation
+            session.break_audio_context()
+        for event in controller.pop_recoveries():
+            session.report_overload(event["stage"],
+                dropped_audio_seconds=event["dropped_audio_seconds"],
+                dropped_items=event["dropped_items"],
+                buffer_seconds=controller.buffered_seconds)
+
+    def audio_gap(dropped_samples):
+        controller.reset_for_gap(dropped_samples)
+        drain_recoveries()
 
     async def recognize(snapshot):
         if snapshot.cached_text is not None:
@@ -21,6 +38,7 @@ async def run(session):
 
     async def accept(snapshot, recognized, duration):
         nonlocal previous
+        drain_recoveries()
         text, language = recognized
         result = controller.accept(snapshot, text, language)
         if not result.is_final:
@@ -33,4 +51,5 @@ async def run(session):
         previous = result.text
         await session._final(text, language)
 
-    await drive(session, controller, controller.next_snapshot, recognize, accept)
+    await drive(session, controller, controller.next_snapshot, recognize, accept,
+                on_audio_gap=audio_gap, on_feed=drain_recoveries)

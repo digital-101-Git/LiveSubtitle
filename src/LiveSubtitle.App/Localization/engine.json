@@ -354,6 +354,12 @@
     "ja": "モデルフォルダーがアプリフォルダー外を参照しています。"
   },
   {
+    "source": "처리가 지연되어 일부 구간을 건너뛰었습니다. 최신 입력부터 자막을 계속 처리합니다.",
+    "en": "Processing fell behind, so some input was skipped. Subtitles will continue from the latest input.",
+    "zh": "处理延迟，已跳过部分片段。将从最新输入继续生成字幕。",
+    "ja": "処理が遅れたため、一部の区間をスキップしました。最新の入力から字幕処理を続けます。"
+  },
+  {
     "source": "같은 이름의 모델이 이미 있습니다. 덮어쓰지 않았습니다.",
     "en": "A model with the same name already exists. It was not overwritten.",
     "zh": "已存在同名模型，未进行覆盖。",

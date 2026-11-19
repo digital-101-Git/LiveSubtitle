@@ -154,8 +154,8 @@ public partial class MainWindow : Window
         TranslationModels.ItemsSource = ReadModels(result, "translation");
         AsrModels.ItemsSource = ReadModels(result, "asr");
         if (TranslationModels.Items.Count > 0) TranslationModels.SelectedIndex = 0;
-        if (AsrModels.Items.Count > 0) AsrModels.SelectedIndex = 0;
         SelectModel(TranslationModels, previousTranslation); SelectModel(AsrModels, previousAsr);
+        if (AsrModels.SelectedIndex < 0 && AsrModels.Items.Count > 0) AsrModels.SelectedIndex = 0;
         AddLog(UiText.F($"모델 목록: 번역 {TranslationModels.Items.Count}개 / 음성 인식 {AsrModels.Items.Count}개"));
     }
 
@@ -295,9 +295,13 @@ public partial class MainWindow : Window
         bool configurable = !_busy && !_running && !_exiting && LocalMode.IsChecked == true;
         bool qwen = (AsrModels.SelectedItem as ModelChoice)?.Backend == "qwen3_asr";
         bool whisper = (AsrModels.SelectedItem as ModelChoice)?.Backend == "whisper";
-        AsrProfileBox.IsEnabled = configurable;
+        bool r2t2 = (AsrModels.SelectedItem as ModelChoice)?.Backend == "r2t2";
+        if (r2t2 && AsrProfileBox.SelectedIndex != 0) AsrProfileBox.SelectedIndex = 0;
+        AsrProfileBox.IsEnabled = configurable && !r2t2;
         AlignAttProfileItem.IsEnabled = whisper;
-        LocalizeText(AsrProfileHint, !AsrProfileCompatible
+        LocalizeText(AsrProfileHint, r2t2
+            ? "Confucius4-R2T2는 발화 중에 안정된 원문을 순서대로 전사합니다."
+            : !AsrProfileCompatible
             ? "Whisper AlignAtt는 Whisper 전용입니다. 시작 전에 ‘기본’ 또는 ‘반복확인(느림)’을 선택하세요."
             : AsrProfile switch {
                 "legacy" => "기본 인식·표시 방식을 사용합니다. 문장 경계 재확인을 켜면 추가 대기가 생길 수 있습니다.",
@@ -403,7 +407,8 @@ public partial class MainWindow : Window
                 if (existing >= 0) _captions[existing] = caption;
                 else _captions.Insert(0, caption);
                 while (_captions.Count > 60) _captions.RemoveAt(_captions.Count - 1);
-                try { _overlay?.SetCaption(translation, source, id.Length > 0 ? combined : null); }
+                bool isFinal = !message.TryGetProperty("is_final", out var finalFlag) || finalFlag.ValueKind != JsonValueKind.False;
+                try { _overlay?.SetCaptionRevision(translation, source, id.Length > 0 ? combined : null, isFinal); }
                 catch (CaptionQueueOverflowException ex)
                 {
                     _ = HandleSessionFailureAsync(ex.Message);

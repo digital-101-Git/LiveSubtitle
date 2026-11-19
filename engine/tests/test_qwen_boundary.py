@@ -139,31 +139,34 @@ def session_for(runtime,enabled=True,language='zh'):
     ('zh','但我唯一。','但我唯一知道的是，你不配。'),
     ('en','I have not.','I have not finished yet.'),
     ('ja','私はまだ。','私はまだ終わっていません。')])
-async def test_unfinished_probe_is_never_translated_or_added_to_context(language,first,second):
+async def test_probe_is_translated_as_draft_and_rechecked_on_same_id(language,first,second):
     runtime=Runtime([first,second])
     session,socket=session_for(runtime,language=language)
     await session.start()
     try:
         await send(session,4)
-        await socket.wait(lambda events:any(e['type']=='transcript' for e in events))
-        assert runtime.translations==[]
-        assert not any(e['type']=='caption' for e in socket.events)
-        await send(session,1)
         await socket.wait(lambda events:any(e['type']=='caption' for e in events))
-        assert runtime.translations==[(second,[])]
+        draft=next(e for e in socket.events if e['type']=='caption')
+        assert not draft['is_final'] and draft['source_text']==first
+        assert session._context=={}
+        await send(session,1)
+        await socket.wait(lambda events:any(e['type']=='caption' and e['is_final'] for e in events))
+        final=next(e for e in socket.events if e['type']=='caption' and e['is_final'])
+        assert final['segment_id']==draft['segment_id'] and final['source_text']==second
+        assert runtime.translations==[(first,[]),(second,[])]
         assert len(runtime.calls)==2 and runtime.calls[1].startswith(runtime.calls[0])
     finally:await session.stop()
 
 
 @pytest.mark.asyncio
 async def test_disabled_option_uses_original_four_second_path():
-    runtime=Runtime(['Old path.'])
+    runtime=Runtime(['Old path.']*4)
     session,socket=session_for(runtime,enabled=False,language='en')
     await session.start()
     try:
         await send(session,4)
-        await socket.wait(lambda events:any(e['type']=='caption' for e in events))
-        assert len(runtime.calls)==1 and len(runtime.calls[0])==128000
+        await socket.wait(lambda events:any(e['type']=='caption' and e['is_final'] for e in events))
+        assert len(runtime.calls[-1])==128000 and sum(len(call)==128000 for call in runtime.calls)==1
     finally:await session.stop()
 
 
@@ -177,9 +180,9 @@ async def test_failed_recheck_keeps_the_first_result_and_reprocesses_extension(f
         await send(session,4)
         await socket.wait(lambda events:any(e['type']=='transcript' for e in events))
         await send(session,1,2000)
-        await socket.wait(lambda events:any(e['type']=='caption' for e in events))
+        await socket.wait(lambda events:any(e['type']=='caption' and e['is_final'] for e in events))
         await send(session,.5,0)
-        await socket.wait(lambda events:sum(e['type']=='caption' for e in events)==2)
+        await socket.wait(lambda events:sum(e['type']=='caption' and e['is_final'] for e in events)==2)
         assert [t[0] for t in runtime.translations]==['First.','Next.']
         assert runtime.calls[2]==pcm(.2)+pcm(1,2000)+pcm(.5,0)
         assert any(e.get('code')=='qwen_boundary_fallback' for e in socket.events)
@@ -209,7 +212,7 @@ async def test_user_stop_does_not_finalize_pending_probe():
     session,socket=session_for(runtime,language='en')
     await session.start()
     await send(session,4)
-    await socket.wait(lambda events:any(e['type']=='transcript' for e in events))
+    await socket.wait(lambda events:any(e['type']=='caption' for e in events))
     await session.stop()
-    assert not runtime.translations
-    assert not any(e['type']=='caption' for e in socket.events)
+    assert [text for text,_ in runtime.translations]==['Unfinished.']
+    assert not any(e['type']=='caption' and e['is_final'] for e in socket.events)

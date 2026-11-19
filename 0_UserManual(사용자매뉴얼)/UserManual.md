@@ -14,6 +14,7 @@ These instructions assume that the runnable app and its runtime are already avai
 | Downloaded model | Destination |
 |---|---|
 | Qwen3-ASR-1.7B | `models/asr/qwen3-asr-1.7b/` |
+| NetEase Confucius4-R2T2 | `models/asr/confucius4-r2t2/` |
 | Whisper large-v3-turbo | `models/asr/whisper-large-v3-turbo/` |
 | Translation model `.gguf` file | `models/translation/` |
 
@@ -33,6 +34,8 @@ The supplied Qwen and Whisper folders already contain configuration and tokenize
 - Use **Language** at the upper right to switch the interface to **한국어 · English · 中文 · 日本語**. Menus, instructions, and the names in the input and translation language lists update immediately, and the setting is saved for the next launch. You can change it while captions are running; the selected input and translation languages and the actual caption text remain unchanged.
 - Click **Stop** before changing the audio source, models, input language, or translation language. If the input and translation languages are the same, captions show the recognized original text.
 - Under **Speech confirmation mode**, **Default** uses the default recognition and display method. **Repeated confirmation (slow)** compares multiple recognition results before displaying text, so it may increase delay and can still leave recognition errors.
+- Select **NetEase Confucius4-R2T2** under local speech recognition to transcribe stable text as the speaker talks. The selected translation model handles translation. To move this model to another installation, copy its entire folder including `UPSTREAM.json`.
+- Qwen, Whisper, NetEase, and Gemini Live can show a draft translation while someone is speaking. A trailing ellipsis marks the draft in the overlay. The same line updates as more speech arrives. The time to the first caption depends on the recognizer, speech, and processing speed.
 - Microphone mode uses audio from the selected input device. If there is no input, check the device connection and Windows microphone access permissions. Microphone captions appear on the monitor by default, and you can edit their position and size.
 - The app must keep running while captions are displayed. Closing its window leaves it running in the system tray. Click **Quit** to exit completely.
 - The translations and original text in **Recent captions** are read-only. Select text with the mouse and press **Ctrl+C** to copy it.
@@ -75,6 +78,7 @@ These models have been checked for successful loading and inference in this app.
 | Purpose | Verified model | Download link |
 |---|---|---|
 | Speech recognition | Qwen3-ASR-1.7B | [Model folder](https://huggingface.co/Qwen/Qwen3-ASR-1.7B-hf/tree/bcd2b5b7f32b480ab5790554cfa8347f246a14f3) |
+| Speech recognition | NetEase Confucius4-R2T2 | [Model folder](https://huggingface.co/netease-youdao/Confucius4-R2T2/tree/d07b4a593610c16074cfc941fba052a7a12eeda3) |
 | Speech recognition | Whisper large-v3-turbo · faster-whisper format | [Model folder](https://huggingface.co/dropbox-dash/faster-whisper-large-v3-turbo/tree/0a363e9161cbc7ed1431c9597a8ceaf0c4f78fcf) |
 | Translation into Korean | HY-MT2-7B · Q6_K | [Download GGUF file](https://huggingface.co/tencent/Hy-MT2-7B-GGUF/resolve/ab8472660ac61fac25f1af43fac2599d52a8a775/HY-MT2-7B-Q6_K.gguf?download=true) |
 | Translation into Korean | MiLMMT-46-12B-v1.0 · i1-Q4_K_M | [Download GGUF file](https://huggingface.co/mradermacher/MiLMMT-46-12B-v1.0-i1-GGUF/resolve/0d63dcbbc3e011bb2728c36769b991cd0109a2dc/MiLMMT-46-12B-v1.0.i1-Q4_K_M.gguf?download=true) |
@@ -91,6 +95,7 @@ LiveSubtitle/
 │  ├─ translation/            Translation .gguf files
 │  └─ asr/
 │     ├─ qwen3-asr-1.7b/      Qwen model, configuration, and tokenizer files
+│     ├─ confucius4-r2t2/
 │     └─ whisper-large-v3-turbo/  Whisper model, configuration, and tokenizer files
 └─ 0_UserManual(사용자매뉴얼)/
    ├─ 사용자매뉴얼.md          Korean

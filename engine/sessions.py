@@ -15,9 +15,11 @@ from .history import CaptionHistory
 from .local_captions import LocalCaptions
 from .local_streaming import LocalWhisperStreaming
 from .sentences import split_sentences
-from .streaming_sentences import StreamingSentences, SentenceUpdate
+from .streaming_sentences import StreamingSentences, SentenceUpdate, extends_draft
 from .settings import EngineError, normalize_language, normalize_target_language
 from .recovery_log import RecoveryLog
+from .translation_profiles import (hymt2_context, is_hymt2_model, is_jakovn_model,
+                                   is_milmmt_model, is_translategemma_model)
 
 
 @dataclass
@@ -29,6 +31,10 @@ class Translation:
     result: str | None = None
     failed: bool = False
     context_epoch: int = 0
+    context_used: tuple[str, ...] | None = None
+    allow_lagging: bool = True
+    visible_revision: int = 0
+    final_sent: bool = False
 
 
 class SessionManager:
@@ -134,6 +140,7 @@ class StreamSession:
         self._deferred_audio: bytes | None = None
         self._asr_generation = 0
         self._translation_inflight: tuple[int, Translation] | None = None
+        self._last_transcript: tuple[int, str, bool, bool | None] | None = None
         self._timings = {"asr_seconds": 0.0, "translation_seconds": 0.0}
         self._recovery_pending: dict[str, dict] = {}
         self._recovery_ready = asyncio.Event()
@@ -178,6 +185,7 @@ class StreamSession:
     def break_audio_context(self):
         self._context.clear()
         self._context_epoch += 1
+        self._last_transcript = None
 
     def report_overload(self, reason, *, dropped_audio_seconds=0.0, dropped_items=0,
                         buffer_seconds=0.0):
@@ -232,6 +240,16 @@ class StreamSession:
     async def emit(self, event: dict) -> None:
         async with self.send_lock:
             if self.active:
+                if event["type"] == "transcript":
+                    segment, source, final = event["segment_id"], event["text"], event["is_final"]
+                    key = (segment, source, final, event.get("preview"))
+                    # Gemini raw messages represent separate provider
+                    # observations, including unchanged repeated hypotheses.
+                    if self.mode == "local" and not final and self._last_transcript == key:
+                        return
+                    self._last_transcript = key
+                elif event["type"] == "caption_remove":
+                    self._last_transcript = None
                 await self._send_locked(event)
 
     async def start(self) -> None:
@@ -318,6 +336,19 @@ class StreamSession:
             await self._queue_translation(self.segment, sentence, language, True,
                                           context_epoch=context_epoch)
 
+    def observe_draft(self, segment: int, source: str, language: str | None) -> bool:
+        """Invalidate outdated work for a known caption. Return whether to reoffer the current draft."""
+        language = language if self.language == "auto" and language else self.language
+        current = self._translations.get(segment)
+        inflight = self._translation_inflight
+        running = inflight[1] if inflight is not None and inflight[0] == segment else None
+        for work in (current, running):
+            if work is None or work.is_final or not work.allow_lagging:
+                continue
+            if work.language != language or (work.source != source and not extends_draft(work.source, source)):
+                work.allow_lagging = False
+        return current is not None and not current.is_final and not current.allow_lagging
+
     async def _queue_translation(self, segment: int, source: str, language: str, is_final: bool,
                                  *, context_epoch: int | None = None) -> bool:
         # Capture before any send/queue await. Recovery may happen while this
@@ -326,7 +357,7 @@ class StreamSession:
             context_epoch = self._context_epoch
         if segment in self._removed_segments or (not is_final and segment in self._final_segments):
             return True  # Retired updates must not be retried.
-        previous = self._translations.get(segment)
+        self.observe_draft(segment, "" if is_final else source, language)
         await self.emit({"type": "transcript", "segment_id": segment, "text": source,
                          "is_final": is_final, "preview": self.mode == "local"})
         if not self.active or segment in self._removed_segments:
@@ -341,20 +372,32 @@ class StreamSession:
             return False
         if is_final:
             self._final_segments.add(segment)
-        if (previous is not None and previous.source == source and previous.language == language
-                and not (previous.failed and is_final)):
-            previous.is_final |= is_final
-            if is_final and previous.result is not None:
-                # Final confirmation reuses both the translation and caption ID.
-                if not previous.failed:
+        previous = self._translations.get(segment)
+        reusable = None
+        if (previous is not None and (is_final or previous.allow_lagging)
+                and previous.source == source and previous.language == language
+                and previous.context_epoch == context_epoch and not (previous.failed and is_final)):
+            if not is_final or previous.is_final:
+                return True
+            # Earlier finals in the same ASR batch can still be queued. Make
+            # this decision after them if they could affect this model's prompt.
+            if self._can_promote(segment, previous):
+                previous.is_final = True
+                if previous.result is not None:
                     self._remember_context(segment, previous)
-                await self._caption(segment, previous)
-                if self._translations.get(segment) is previous:
-                    self._translations.pop(segment, None)
-            return True
+                    await self._caption(segment, previous)
+                    if self._translations.get(segment) is previous:
+                        self._translations.pop(segment, None)
+                return True
+            if previous.result is not None:
+                reusable = previous
         revision = self._revisions.get(segment, 0) + 1
         self._revisions[segment] = revision
         work = Translation(source, language, is_final, revision, context_epoch=context_epoch)
+        if previous is not None:
+            work.visible_revision = previous.visible_revision
+        if reusable is not None:
+            work.result, work.context_used = reusable.result, reusable.context_used
         self._translations[segment] = work
         self._context.pop(segment, None)
         self._prune_stale_translations()
@@ -430,12 +473,26 @@ class StreamSession:
 
     async def _caption(self, segment: int, work: Translation) -> None:
         async with self.send_lock:
-            if self.active and self._translations.get(segment) is work:
-                await self._send_locked({
-                    "type": "caption", "segment_id": segment,
-                    "source_text": work.source, "text": work.result, "language": work.language,
-                    "is_final": work.is_final, "revision": work.revision,
-                    "translation_status": "failed" if work.failed else "ok"})
+            current = self._translations.get(segment)
+            if not self.active or current is None or current.final_sent:
+                return
+            if current is not work:
+                if (work.is_final or current.is_final or segment in self._final_segments
+                        or work.failed or not work.allow_lagging or not current.allow_lagging
+                        or current.language != work.language
+                        or work.context_epoch != self._context_epoch or current.context_epoch != work.context_epoch
+                        or work.context_used != self._translation_context(segment, current)
+                        or work.revision <= current.visible_revision or not extends_draft(work.source, current.source)):
+                    return
+            elif not work.is_final and (not work.allow_lagging or work.context_epoch != self._context_epoch):
+                return
+            current.visible_revision = work.revision
+            current.final_sent = work.is_final
+            await self._send_locked({
+                "type": "caption", "segment_id": segment,
+                "source_text": work.source, "text": work.result, "language": work.language,
+                "is_final": work.is_final, "revision": work.revision,
+                "translation_status": "failed" if work.failed else "ok"})
 
     async def _translation_warning(self, segment: int, work: Translation, code: str) -> None:
         async with self.send_lock:
@@ -468,6 +525,10 @@ class StreamSession:
                 await asyncio.sleep(0)
 
     async def _local_once(self) -> None:
+        if getattr(self.runtime, "asr_backend", None) == "r2t2":
+            from .r2t2_session import run
+            await run(self)
+            return
         profile = self.settings.data.get("asr_profile", "legacy")
         if profile == "alignatt":
             from .stable_sessions import alignatt
@@ -511,9 +572,12 @@ class StreamSession:
 
     async def _local_qwen_recheck(self) -> None:
         from .qwen_boundary import BoundaryChunker
+        from .revisable_captions import RevisableCaptions
         from difflib import SequenceMatcher
 
         chunker = BoundaryChunker()
+        captions = RevisableCaptions()
+        clock = asyncio.get_running_loop().time
         previous = ""
         draft = ""
         draft_language = self.language
@@ -539,8 +603,8 @@ class StreamSession:
                     return
                 if request.probe:
                     draft, draft_language = text, language
-                    await self.emit({"type": "transcript", "segment_id": self.segment + 1,
-                                     "text": text, "is_final": False, "preview": True})
+                    preview = remove_overlap(previous, text) if request.overlaps_previous else text
+                    await captions.publish(self, preview, preview, language, False, clock())
                     chunker.resolve(request)
                     continue
                 use_extension = True
@@ -560,7 +624,7 @@ class StreamSession:
                 if request.overlaps_previous:
                     text = remove_overlap(previous, text)
                 previous = raw_text
-                await self._final(text, language)
+                await captions.publish(self, text, text, language, True, clock())
                 chunker.resolve(request, use_extension=use_extension)
                 draft = ""
 
@@ -610,13 +674,16 @@ class StreamSession:
                 # that same ID. The ASR controller remains the authority for
                 # committed speech and retains its original audio context.
                 updates = captions.accept(snapshot, result, loop.time())
+                preview_id = captions.preview_id
+                if preview_id is not None and self.observe_draft(preview_id, result.pending_text, language):
+                    captions.defer_preview(preview_id)
                 for update in await self._apply_sentences(updates, language):
                     captions.defer_preview(update.segment_id, update.text)
                 # Keep the main window's raw recognition preview responsive,
                 # including the first second and translation-throttled updates.
                 if result.pending_text and not any(
                         not update.is_final and update.text == result.pending_text for update in updates):
-                    await self.emit({"type": "transcript", "segment_id": self.segment + 1,
+                    await self.emit({"type": "transcript", "segment_id": preview_id or self.segment + 1,
                                      "text": result.pending_text, "is_final": False, "preview": True})
 
     async def _translate(self) -> None:
@@ -638,18 +705,41 @@ class StreamSession:
         ordered = sorted(self._context, key=self._sentence_order.__getitem__)
         self._context = {key: self._context[key] for key in ordered[-3:]}
 
-    async def _translate_sentence(self, segment: int, work: Translation) -> None:
-        if self._translations.get(segment) is not work:
-            return
+    def _uses_context(self, work: Translation) -> bool:
+        path = getattr(self.runtime, "translation_path", None)
+        return (work.language != self.target_language and not (
+            is_jakovn_model(path) or is_milmmt_model(path) or is_translategemma_model(path)))
+
+    def _translation_context(self, segment: int, work: Translation) -> tuple[str, ...]:
+        if work.context_epoch != self._context_epoch or not self._uses_context(work):
+            return ()
         order = self._sentence_order[segment]
         ordered = sorted(self._context, key=self._sentence_order.__getitem__)
-        context = ([self._context[key] for key in ordered if self._sentence_order[key] < order][-3:]
-                   if work.context_epoch == self._context_epoch else [])
+        context = [self._context[key] for key in ordered if self._sentence_order[key] < order][-3:]
+        return hymt2_context(context) if is_hymt2_model(getattr(self.runtime, "translation_path", None)) else tuple(context)
+
+    def _can_promote(self, segment: int, work: Translation) -> bool:
+        if not self._uses_context(work):
+            return True
+        if any(other != segment and pending.is_final and pending.context_epoch == work.context_epoch
+               and self._sentence_order[other] < self._sentence_order[segment]
+               for other, pending in self._translations.items()):
+            return False
+        return work.context_used is None or work.context_used == self._translation_context(segment, work)
+
+    async def _translate_sentence(self, segment: int, work: Translation) -> None:
         while self.active and self._translations.get(segment) is work:
+            context = self._translation_context(segment, work)
+            if work.is_final and work.result is not None and work.context_used == context and not work.failed:
+                self._remember_context(segment, work)
+                await self._caption(segment, work)
+                break
+            work.result = None
+            work.context_used = context
             began_final = work.is_final
             began = time.monotonic()
             try:
-                work.result = await self.runtime.translate(work.source, work.language, context,
+                work.result = await self.runtime.translate(work.source, work.language, list(context),
                                                            target_language=self.target_language)
                 work.failed = False
             except EngineError as exc:
@@ -676,9 +766,8 @@ class StreamSession:
                 break
             finally:
                 self.record_timing("translation", time.monotonic() - began)
-            if not self.active or self._translations.get(segment) is not work:
-                return
-            self._remember_context(segment, work)
+            if self.active and self._translations.get(segment) is work:
+                self._remember_context(segment, work)
             await self._caption(segment, work)
             break
         if work.is_final and self._translations.get(segment) is work:
@@ -771,6 +860,9 @@ class StreamSession:
             interim_text = interim.get("text") or ""
             if len(interim_text) > 6000:
                 raise EngineError("transcript_too_long", "음성 구간이 너무 깁니다. 자막을 다시 시작해 주세요.")
+            for segment, source in sentences.draft_observations(interim_text):
+                if self.observe_draft(segment, source, self.language):
+                    sentences.retry_draft(segment)
             await self._apply_sentences(sentences.observe(interim_text, now))
             if interim_text:
                 await self.emit({"type": "transcript", "segment_id": self.segment + 1,

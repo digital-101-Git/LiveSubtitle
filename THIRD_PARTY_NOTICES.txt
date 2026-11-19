@@ -66,6 +66,12 @@ Apache License 2.0 원문: https://www.apache.org/licenses/LICENSE-2.0
 이 앱은 Hugging Face/PyTorch 경로로 로컬 추론합니다.
 모델 가중치뿐 아니라 내려받은 설정·토크나이저에도 각 배포처의 조건을 적용합니다.
 
+추가 음성 인식 모델 · NetEase Youdao Confucius4-R2T2 (2026-11-19)
+공식 모델 https://huggingface.co/netease-youdao/Confucius4-R2T2
+고정 리비전 d07b4a593610c16074cfc941fba052a7a12eeda3
+모델 가중치의 이용조건은 NetEase Youdao Model Use License Agreement입니다.
+models/asr/confucius4-r2t2/MODEL_LICENSE에 원문을, UPSTREAM.json에 출처와 파일별 검증값을 보관합니다.
+
 1a. 추가 번역 모델: TranslateGemma 12B / bullerwins Q4_K_M GGUF
 ------------------------------------------------------------
 원본 모델: google/translategemma-12b-it

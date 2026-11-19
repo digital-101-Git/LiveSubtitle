@@ -201,6 +201,24 @@ def is_hymt2_model(path: str | Path | None) -> bool:
     return _HYMT2_MODEL_NAME.search(name) is not None
 
 
+def hymt2_context(context: list[str] | None) -> tuple[str, ...]:
+    """The complete, sanitized prior sentences used in the HY prompt."""
+    if context is not None and not isinstance(context, list):
+        raise TypeError("Context must be a list of strings or None.")
+    previous: list[str] = []
+    context_chars = 0
+    for entry in reversed((context or [])[-3:]):
+        if not isinstance(entry, str):
+            raise TypeError("Context entries must be strings.")
+        entry = entry.strip()
+        cost = len(entry) + bool(previous)
+        if entry and context_chars + cost <= HYMT2_CONTEXT_CHARS:
+            previous.append(_TOKEN_LITERAL.sub(
+                lambda match: "＜" + match[0][1:-1] + "＞", entry))
+            context_chars += cost
+    return tuple(reversed(previous))
+
+
 def build_hymt2_messages(
     text: str, source_language: str | None = "auto", context: list[str] | None = None,
     glossary: list[dict[str, str]] | None = None,
@@ -241,21 +259,7 @@ def build_hymt2_messages(
     # terminology. Never inject its Korean targets into another output language.
     terms = matching_glossary(source, glossary) if target_code == "ko" else []
     source = _TOKEN_LITERAL.sub(lambda match: "＜" + match[0][1:-1] + "＞", source)
-    if context is not None and not isinstance(context, list):
-        raise TypeError("Context must be a list of strings or None.")
-    previous: list[str] = []
-    context_chars = 0
-    # Prefer recent complete sentences when the total context exceeds the cap.
-    for entry in reversed((context or [])[-3:]):
-        if not isinstance(entry, str):
-            raise TypeError("Context entries must be strings.")
-        entry = entry.strip()
-        cost = len(entry) + bool(previous)
-        if entry and context_chars + cost <= HYMT2_CONTEXT_CHARS:
-            previous.append(_TOKEN_LITERAL.sub(
-                lambda match: "＜" + match[0][1:-1] + "＞", entry))
-            context_chars += cost
-    previous.reverse()
+    previous = hymt2_context(context)
     sections = []
     if previous:
         background = "\n".join(previous)

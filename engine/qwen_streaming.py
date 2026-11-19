@@ -17,6 +17,7 @@ import unicodedata
 
 from .sentences import completed_sentence_prefix, split_sentences
 from .settings import EngineError
+from .streaming_sentences import extends_draft
 from .text_normalization import chinese_comparison_text
 
 
@@ -47,6 +48,7 @@ class QwenResult:
     window_closed: bool = False
     replacement_segments: tuple[str, ...] | None = None
     language: str = "auto"
+    agreed_pending: str = ""
 
 
 @dataclass(slots=True)
@@ -117,6 +119,22 @@ def _normalized(text: str) -> tuple[str, list[int]]:
 
 def _key(text: str) -> str:
     return _normalized(text)[0]
+
+
+def _agreed_pending(previous: str, current: str) -> str:
+    """Retain the observed spelling; never publish part of a Latin word/number."""
+    end = 0
+    for left, right in zip(previous, current):
+        if left != right and not (_cjk(left) and _cjk(right) and _key(left) == _key(right)):
+            break
+        end += 1
+    # Use the same word, number, contraction and CJK boundary policy as MT.
+    # Check each observed spelling separately (script variants may compare equal).
+    while end and not all(end == len(text) or extends_draft(text[:end], text)
+                          for text in (previous, current)):
+        end -= 1
+    prefix = current[:end]
+    return prefix.strip() if any(char.isalnum() for char in prefix) else ""
 
 
 def _after_key(text: str, length: int) -> str:
@@ -373,7 +391,8 @@ class QwenStreaming:
                 return QwenResult(language=language)
             if not window.closed:
                 window.cached = (snapshot, text, language)
-                return QwenResult(pending_text=text, language=language)
+                tail, _ = self._suffix(window, text)
+                return QwenResult(pending_text=tail or "", language=language)
         final = snapshot.is_final or (snapshot.speculative and window.closed and bool(text))
         if snapshot.speculative and window.closed and not text:
             # Force a complete final request after an empty speculative result.
@@ -413,11 +432,16 @@ class QwenStreaming:
         segments = _stable_sentences(suffix, stable) if suffix is not None else ()
         if segments:
             window.published.extend(segments)
+        remaining, _ = self._suffix(window, text)
+        previous_remaining, _ = self._suffix(window, window.previous)
+        agreed = (_agreed_pending(previous_remaining, remaining)
+                  if previous_remaining and remaining and snapshot.end_sample > window.previous_end else "")
         window.previous = text
         window.previous_end = snapshot.end_sample
-        remaining, _ = self._suffix(window, text)
-        return QwenResult(segments, remaining if remaining is not None else text,
-                          tuple(warnings), language=language)
+        # A revised history that cannot be aligned is reconciled at final.
+        # Presenting the cumulative decode here would repeat earlier captions.
+        return QwenResult(segments, remaining or "",
+                          tuple(warnings), language=language, agreed_pending=agreed)
 
     def stop(self) -> None:
         """Cancel; a model reply arriving after stop cannot publish or revive PCM."""

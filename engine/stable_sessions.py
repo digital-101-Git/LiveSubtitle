@@ -1,4 +1,4 @@
-"""Final-only streaming adapters with audio ingestion independent of inference."""
+"""Streaming caption adapters with audio ingestion independent of inference."""
 from __future__ import annotations
 
 import asyncio
@@ -8,9 +8,11 @@ import math
 import struct
 import time
 
+from .local_captions import LocalCaptions
 from .local_streaming import LocalWhisperStreaming
+from .qwen_revisions import reconcile
 from .qwen_streaming import QwenStreaming
-from .sentences import completed_sentence_prefix
+from .sentences import completed_sentence_prefix, split_sentences
 from .settings import EngineError
 from .streaming_sentences import SentenceUpdate
 
@@ -53,7 +55,7 @@ async def drive(session, controller, next_snapshot, recognize, accept, *, on_aud
                 exc.buffer_seconds = getattr(controller, "buffered_seconds", 0)
                 raise
             if on_feed is not None:
-                on_feed()
+                await on_feed()
             changed.set()
 
     async def infer():
@@ -97,6 +99,7 @@ async def warnings(session, codes):
 
 async def whisper(session):
     controller = LocalWhisperStreaming(early_transcription=True)
+    captions = LocalCaptions(start_id=session.segment + 1)
     prompt, window_id, cached_language = "", None, session.language
 
     async def recognize(snapshot):
@@ -120,18 +123,81 @@ async def whisper(session):
         if result.reset_prompt:
             prompt = ""
         await warnings(session, result.warnings)
-        for text in result.segments:
-            await session._final(text, language)
+        # A speculative silence decode only fills the ASR cache. Its empty
+        # result is not a withdrawal of an already visible hypothesis.
+        if not snapshot.speculative:
+            updates = captions.accept(snapshot, result, time.monotonic(), agreed_pending=result.agreed_pending)
+            if captions.preview_id is not None and session.observe_draft(
+                    captions.preview_id, result.pending_text, language):
+                captions.defer_preview(captions.preview_id)
+            for update in await session._apply_sentences(updates, language):
+                captions.defer_preview(update.segment_id, update.text)
+            if result.pending_text and not snapshot.is_final:
+                await session.emit({"type": "transcript", "segment_id": captions.preview_id or session.segment + 1,
+                                    "text": result.pending_text, "is_final": False, "preview": True})
 
     await drive(session, controller, controller.snapshot, recognize, accept)
 
 
-async def qwen(session):
-    from .qwen_revisions import reconcile
+class QwenWindowCaptions:
+    """Keep committed clause IDs while revising the current unfinished clause."""
 
+    def __init__(self):
+        self.confirmed = ()
+        self.draft = ()
+        self.offered = None
+        self.last_offer = float("-inf")
+
+    async def publish(self, session, window_id, result, language, now):
+        # An authoritative full-window correction may even insert speech before a
+        # previously confirmed clause. Ordinary updates may only revise the tail.
+        previous = self.confirmed + self.draft
+        previous_confirmed = dict(self.confirmed)
+        if result.replacement_segments is not None:
+            revision = reconcile(previous, result.replacement_segments, session.segment)
+            confirmed, draft = revision.captions, ()
+        else:
+            segments = result.segments
+            raw_parts = split_sentences(result.pending_text)
+            if self.draft and not segments and not result.window_closed:
+                if session.observe_draft(self.draft[0][0], raw_parts[0] if raw_parts else "", language):
+                    self.offered = None
+            pending = split_sentences(result.agreed_pending)[:1] if not result.window_closed else []
+            if raw_parts and not pending and not segments and not result.window_closed:
+                # This first/changed observation can update the source preview.
+                # Wait for independent agreement before starting translation.
+                return
+            if (pending and now - self.last_offer < LocalCaptions.update_interval_seconds
+                    and not segments):
+                return
+            revision = reconcile(self.draft, (*segments, *pending), session.segment)
+            confirmed = self.confirmed + revision.captions[:len(segments)]
+            draft = revision.captions[len(segments):]
+
+        session.segment = revision.last_id
+        # Install chronological order and invalidate changed prior context
+        # before yielding to the asynchronous translation worker.
+        for index, (identifier, source) in enumerate(confirmed + draft):
+            session._sentence_order[identifier] = (window_id, index)
+            if identifier in previous_confirmed and previous_confirmed[identifier] != source:
+                session._context.pop(identifier, None)
+        updates = [SentenceUpdate(identifier, source, True, removed=True)
+                   for identifier, source in revision.removed]
+        updates.extend(SentenceUpdate(identifier, source, True) for identifier, source in confirmed
+                       if previous_confirmed.get(identifier) != source)
+        offered = (draft[0][0], draft[0][1], language) if draft else None
+        if offered and offered != self.offered:
+            updates.append(SentenceUpdate(draft[0][0], draft[0][1], False))
+            self.last_offer = now
+        self.confirmed, self.draft = confirmed, draft
+        deferred = await session._apply_sentences(updates, language)
+        self.offered = None if deferred else offered
+
+
+async def qwen(session):
     detector = await asyncio.to_thread(session.runtime.create_voice_detector) if hasattr(session.runtime, "create_voice_detector") else None
     controller = QwenStreaming(voiced_detector=detector)
-    published = {}
+    captions = QwenWindowCaptions()
 
     async def recognize(snapshot):
         if snapshot.cached_text is not None:
@@ -139,36 +205,20 @@ async def qwen(session):
         return await asyncio.to_thread(session.runtime.transcribe, snapshot.pcm, session.language)
 
     async def accept(snapshot, recognized, duration):
+        nonlocal captions
         text, language = recognized
         result = controller.accept(snapshot, text, language, inference_seconds=duration)
         language = result.language if session.language == "auto" else session.language
-        old = published.setdefault(snapshot.window_id, [])
-        if result.replacement_segments is not None:
-            revised = reconcile(old, result.replacement_segments, session.segment)
-            previous_sources = dict(old)
-            session.segment = revised.last_id
-            # Publish the complete final order before any awaited translation.
-            # Inserted speech has a fresh ID even when its place is at the front.
-            for index, (identifier, source) in enumerate(revised.captions):
-                session._sentence_order[identifier] = (snapshot.window_id, index)
-                if previous_sources.get(identifier) != source:
-                    session._context.pop(identifier, None)
-            for identifier, previous in revised.removed:
-                await session._apply_sentences([SentenceUpdate(identifier, previous, True, removed=True)], language)
-            for identifier, source in revised.captions:
-                if previous_sources.get(identifier) != source:
-                    await session._queue_translation(identifier, source, language, True)
-            old[:] = revised.captions
-        else:
-            for source in result.segments:
-                session.segment += 1
-                identifier = session.segment
-                session._sentence_order[identifier] = (snapshot.window_id, len(old))
-                old.append((identifier, source))
-                await session._queue_translation(identifier, source, language, True)
+        # An invalidated early-silence observation supplies no new text.
+        if not (getattr(snapshot, "speculative", False) and not result.window_closed and not result.pending_text):
+            await captions.publish(session, snapshot.window_id, result, language, time.monotonic())
+            if result.pending_text and not result.window_closed:
+                identifier = captions.draft[0][0] if captions.draft else session.segment + 1
+                await session.emit({"type": "transcript", "segment_id": identifier, "text": result.pending_text,
+                                    "is_final": False, "preview": True})
         await warnings(session, result.warnings)
         if result.window_closed:
-            published.pop(snapshot.window_id, None)
+            captions = QwenWindowCaptions()
 
     await drive(session, controller, controller.next_snapshot, recognize, accept)
 
@@ -181,6 +231,10 @@ class AlignPacket:
 
 class AlignPackets:
     """Incremental packets, actual silence endpoints, no text-based PCM cuts."""
+    packet_bytes = 32000
+    overrun_code = "alignatt_audio_overrun"
+    overrun_message = "Whisper AlignAtt 처리가 음성 속도를 따라가지 못해 중지했습니다."
+
     def __init__(self, voiced_detector=None):
         self.frames = bytearray()
         self.prefix = deque(maxlen=20)
@@ -211,13 +265,13 @@ class AlignPackets:
             self.window_frames += 1
             self.silent = 0 if voiced else self.silent + 1
             final = self.silent >= 25 or self.window_frames >= 600
-            if final or len(self.pending) >= 32000:
+            if final or len(self.pending) >= self.packet_bytes:
                 packet = AlignPacket(bytes(self.pending), final)
                 self.ready.append(packet)
                 self.queued_bytes += len(packet.pcm)
                 self.pending.clear()
                 if self.queued_bytes > 30 * 32000 or len(self.ready) > 80:
-                    raise EngineError("alignatt_audio_overrun", "Whisper AlignAtt 처리가 음성 속도를 따라가지 못해 중지했습니다.", 409)
+                    raise EngineError(self.overrun_code, self.overrun_message, 409)
             if final:
                 self.started = False
                 self.silent = self.window_frames = 0
@@ -234,6 +288,13 @@ class AlignPackets:
         self.pending.clear()
         self.prefix.clear()
         self.ready.clear()
+
+
+_CLOSING_MARKS = ".,!?;:、。！？…，；：)]}»›”’」』】）》〉〕〗〙〛"
+
+
+def _closing_marks_only(text):
+    return bool(text.strip()) and all(char.isspace() or char in _CLOSING_MARKS for char in text)
 
 
 class CommittedPhrases:
@@ -260,7 +321,7 @@ class CommittedPhrases:
                 substantial = sum(char.isalnum() for char in text) >= 6
                 pause = word.start - self.words[-1].end >= .3
                 duration = self.words[-1].end - self.words[0].start
-                if substantial and (pause or duration >= 3.0):
+                if substantial and (pause or duration >= 3.0) and not _closing_marks_only(word.text):
                     flush()
             self.words.append(word)
             text = "".join(item.text for item in self.words).strip()
@@ -272,17 +333,37 @@ class CommittedPhrases:
 
 
 async def alignatt(session):
+    from .revisable_captions import RevisableCaptions
+
     controller = AlignPackets()
     stream = session.runtime.create_alignatt_stream(session.language)
     phrases = CommittedPhrases()
+    captions = RevisableCaptions()
+    last_final = None
 
     async def recognize(snapshot):
         return await asyncio.to_thread(session.runtime.transcribe_alignatt, stream, snapshot.pcm, snapshot.is_final)
 
     async def accept(snapshot, recognized, duration):
+        nonlocal last_final
         words, language = recognized
+        now = time.monotonic()
         for complete in phrases.accept(words, snapshot.is_final):
-            await session._final(complete, language)
+            if last_final and _closing_marks_only(complete):
+                identifier, previous, previous_language = last_final
+                text = previous + complete
+                await session._apply_sentences([SentenceUpdate(identifier, text, True)], previous_language)
+                last_final = (identifier, text, previous_language)
+            else:
+                finalized = await captions.publish(session, complete, "", language, True, now)
+                if finalized:
+                    last_final = (*finalized[-1], language)
+        if phrases.words:
+            pending = "".join(word.text for word in phrases.words)
+            if not _closing_marks_only(pending):
+                await captions.publish(session, "", pending, language, False, now)
+        if snapshot.is_final:
+            last_final = None
 
     try:
         await drive(session, controller, controller.snapshot, recognize, accept)

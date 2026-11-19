@@ -1,4 +1,4 @@
-"""Final-only Qwen chunks with conservative early recognition and VAD hints.
+"""Qwen chunks with provisional previews, conservative endpoints and VAD hints.
 
 PCM ownership follows the legacy four-second/200-ms-overlap policy. RMS opens
 windows; the optional neural detector can only help end an already active one.
@@ -57,6 +57,7 @@ class _Window:
     reason: str = ""
     cached: tuple[FastSnapshot, str, str] | None = None
     had_early_text: bool = False
+    sent_speech_preview: bool = False
 
     @property
     def end(self):
@@ -285,7 +286,7 @@ class FastQwenController:
                 self._prefix.extend((first+i//2, tail[i:i+self.frame_bytes])
                                     for i in range(0, len(tail), self.frame_bytes))
 
-    def next_snapshot(self):
+    def next_snapshot(self, *, allow_speech_preview=False):
         if self._stopped or self._request is not None:
             return None
         while self._windows:
@@ -301,18 +302,27 @@ class FastQwenController:
             speculative = (not window.closed and window.silent*.02 >= self.speculative_silence_seconds
                            and window.rms_silent*.02 >= self.speculative_silence_seconds
                            and window.last_spec_pause != window.pause_id)
-            if not has_speech or not (window.closed or speculative):
+            # One mid-speech decode per window. Skip the opportunity if the
+            # worker only catches up near the hard cut or the endpoint is forming.
+            # A preview never consumes PCM or becomes an authoritative ASR result.
+            speech_preview = (allow_speech_preview and not window.closed
+                              and not window.sent_speech_preview and not window.silent
+                              and 1.4 <= len(window.pcm) / 32000 <= 2.4)
+            if not has_speech or not (window.closed or speculative or speech_preview):
                 return None
             cached = window.cached if window.closed else None
             if cached and (cached[0].speech_revision != window.speech_revision or not cached[1]):
                 cached = None
+            reason = window.reason if window.closed else ("speech_preview" if speech_preview else "early_silence")
             snapshot = FastSnapshot(window.identifier, window.start, window.end, bytes(window.pcm),
-                                    window.closed, speculative, window.reason if window.closed else "early_silence",
+                                    window.closed, speculative, reason,
                                     window.speech_revision, window.overlaps_previous,
                                     cached[1] if cached else None, cached[2] if cached else "auto")
             if speculative:
                 window.last_spec_pause = window.pause_id
                 self.statistics["speculative_requests"] += 1
+            if speech_preview:
+                window.sent_speech_preview = True
             if cached:
                 self.statistics["cache_reuses"] += 1
             self._request = snapshot
@@ -334,6 +344,11 @@ class FastQwenController:
         if window.identifier != snapshot.window_id:
             raise RuntimeError("The audio window changed before recognition completed.")
         text = text.strip()
+        if snapshot.reason == "speech_preview":
+            if window.closed:
+                return FastResult()  # Decode the authoritative window immediately.
+            window.had_early_text |= bool(text)
+            return FastResult(text, language, overlaps_previous=window.overlaps_previous, reason=snapshot.reason)
         if snapshot.speculative:
             window.had_early_text |= bool(text)
             if snapshot.speech_revision != window.speech_revision:
@@ -341,7 +356,7 @@ class FastQwenController:
                 return FastResult()
             if not window.closed:
                 window.cached = (snapshot, text, language)
-                return FastResult()
+                return FastResult(text, language, overlaps_previous=window.overlaps_previous, reason=snapshot.reason)
             if not text:
                 return FastResult()  # Empty early ASR cannot replace final ASR.
             self.statistics["cache_reuses"] += 1

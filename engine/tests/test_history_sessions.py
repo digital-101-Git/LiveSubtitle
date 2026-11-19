@@ -333,6 +333,9 @@ async def test_positive_rms_music_over_40_seconds_keeps_session_and_repeated_lat
                 background_pcm(marker=opening_speech and second == 0))
         before = [event for event in client.events if event["type"] == "caption" and event["is_final"]]
         assert [event["source_text"] for event in before] == (["Yes."] if opening_speech else [])
+        if profile == "stable":
+            early = [e for e in client.events if e["type"] == "caption" and not e["is_final"]]
+            assert all(opening_speech and e["source_text"] == "Yes." for e in early)
         if opening_speech:
             assert any(prompt == "Yes." for _, prompt in runtime.prompts)
         assert runtime.prompts[-1][0] >= 40
@@ -347,7 +350,9 @@ async def test_positive_rms_music_over_40_seconds_keeps_session_and_repeated_lat
         assert [event["source_text"] for event in captions] == ["Yes."] * (2 + int(opening_speech))
         assert len({event["segment_id"] for event in captions}) == len(captions)
         if profile == "stable":
-            assert all(event["is_final"] for event in client.events if event["type"] == "caption")
+            spoken_ids = {e["segment_id"] for e in captions}
+            assert all(e["source_text"] == "Yes." and e["segment_id"] in spoken_ids
+                       for e in client.events if e["type"] == "caption" and not e["is_final"])
         assert not any(event["type"] in {"error", "stopped"} for event in client.events)
         assert session.active and manager.active is session
         await manager.flush_history()
@@ -376,6 +381,10 @@ async def test_unstable_recognition_over_40_seconds_recovers_final_windows_and_f
         before = [event["source_text"] for event in client.events if event["type"] == "caption" and event["is_final"]]
         assert before == client.deadline_sources
         assert len(before) == len(set(before))
+        if profile == "stable":
+            # The recognizer alternates Alpha/Beta on music: each hypothesis
+            # occurred once, so none can be translated as an early draft.
+            assert not any(e["type"] == "caption" and not e["is_final"] for e in client.events)
 
         runtime.unstable = False
         for _ in range(2):
@@ -385,7 +394,9 @@ async def test_unstable_recognition_over_40_seconds_recovers_final_windows_and_f
         assert [event["source_text"] for event in captions] == client.deadline_sources + ["Yes.", "Yes."]
         assert len({event["segment_id"] for event in captions}) == len(captions)
         if profile == "stable":
-            assert all(event["is_final"] for event in client.events if event["type"] == "caption")
+            spoken_ids = {e["segment_id"] for e in captions[-2:]}
+            assert all(e["source_text"] == "Yes." and e["segment_id"] in spoken_ids
+                       for e in client.events if e["type"] == "caption" and not e["is_final"])
         assert not any(event["type"] in {"error", "stopped"} for event in client.events)
         assert session.active
     finally:

@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 from engine.asr_qwen import MAX_NEW_TOKENS, QwenASR
-from engine.models import ASR_FILES, QWEN_ASR_FILES, asr_backend, inventory
+from engine.models import ASR_FILES, QWEN_ASR_FILES, R2T2_ASR_FILES, asr_backend, inventory
 from engine.runtime import Runtime
 from engine.settings import EngineError
 
@@ -46,6 +46,27 @@ def test_inventory_identifies_whisper_and_complete_native_qwen(tmp_path):
     models = inventory(tmp_path)["asr"]
     assert [(entry["path"], entry["backend"]) for entry in models] == [
         ("models/asr/qwen", "qwen3_asr"), ("models/asr/whisper", "whisper")]
+
+
+def test_r2t2_inventory_distinguishes_original_checkpoint_from_qwen(tmp_path):
+    path = tmp_path / "models/asr/renamed"
+    path.mkdir(parents=True)
+    for name in R2T2_ASR_FILES:
+        (path / name).write_text("{}", encoding="utf-8")
+    (path / "config.json").write_text(json.dumps({"model_type": "qwen3_asr",
+        "architectures": ["Qwen3ASRForConditionalGeneration"], "thinker_config": {}}))
+    safetensors(path / "model.safetensors")
+    assert inventory(tmp_path)["asr"] == []
+    manifest = path / "UPSTREAM.json"
+    manifest.write_text(json.dumps({"model": "netease-youdao/Confucius4-R2T2"}))
+    assert asr_backend(path) == "r2t2"
+    assert inventory(tmp_path)["asr"] == [
+        {"name": "renamed", "path": "models/asr/renamed", "backend": "r2t2"}]
+    path = path.rename(path.with_name("confucius4-r2t2"))
+    assert inventory(tmp_path)["asr"] == [
+        {"name": "NetEase Confucius4-R2T2", "path": "models/asr/confucius4-r2t2", "backend": "r2t2"}]
+    (path / "preprocessor_config.json").unlink()
+    assert inventory(tmp_path)["asr"] == []
 
 
 @pytest.mark.parametrize("broken", ["weights", "processor", "architecture"])

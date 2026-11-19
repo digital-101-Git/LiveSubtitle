@@ -2,7 +2,7 @@ LiveSubtitle Engine API v1 — Windows 앱과 미래 브라우저 확장 공용
 
 구조
   Windows WPF UI → WASAPI 브라우저/시스템/마이크 오디오 → PCM16 WebSocket → Python 엔진
-  Python 엔진 → 로컬 Whisper / Qwen3-ASR 또는 Gemini Live → 전사문
+  Python 엔진 → 로컬 Whisper / Qwen3-ASR / Confucius4-R2T2 또는 Gemini Live → 전사문
   전사문 → 로컬 llama.cpp / 선택한 GGUF → 선택 언어 caption 이벤트
   caption 이벤트 → Windows 투명 자막창 또는 향후 확장 오버레이
 
@@ -18,7 +18,7 @@ LiveSubtitle Engine API v1 — Windows 앱과 미래 브라우저 확장 공용
   HTTP: http://127.0.0.1:17865
   WebSocket: ws://127.0.0.1:17865/v1/stream
 - 서버는 loopback에만 바인딩합니다.
-- GET /health만 공개하며 {ok:true, service:"LiveSubtitle", version:"1.0.2"}를 반환합니다.
+- GET /health만 공개하며 {ok:true, service:"LiveSubtitle", version:"1.0.3"}를 반환합니다.
 - HTTP /v1/*는 Authorization: Bearer <token>이 필요합니다.
 - 토큰은 첫 실행 시 config/engine-token.txt에 생성됩니다. 문서나 확장 소스에 넣지 마세요.
 - 기본 임의 웹사이트 Origin은 거부합니다. Chromium extension Origin과 Origin 없는
@@ -29,8 +29,9 @@ LiveSubtitle Engine API v1 — Windows 앱과 미래 브라우저 확장 공용
 - 오디오 업로드는 사용자가 해당 모드를 선택하고 시작한 세션에만 한정해야 합니다.
 
 GET /v1/models
-  {translation:[{name,path,size}], asr:[{name,path}]}
+  {translation:[{name,path,size}], asr:[{name,path,backend}]}
   path는 앱 루트 기준 상대 경로입니다.
+  Confucius4-R2T2의 backend는 r2t2입니다. 로컬 모드에서 asr_profile=legacy로 준비합니다.
 
 GET /v1/settings
   {mode,language,target_language,translation_model,asr_model,asr_hints,qwen_boundary_recheck,gemini_key_set,save_gemini_key,status}
@@ -61,7 +62,7 @@ PUT /v1/settings
   최대 1초(또는 500ms 무음까지) 더해 한 번 재인식한 뒤 확정합니다. 자연 종료된
   짧은 발화는 기존대로 처리합니다. 재인식 오류/빈 결과는 첫 결과를 확정하고,
   추가 PCM은 다음 구간에서 다시 처리합니다. 재추론 시간이 추가되므로 총 지연이 1초라는 뜻은 아닙니다.
-  두 옵션은 Whisper/Gemini에는 적용하지 않습니다. 힌트로 인식 정확도를 보장하지 않습니다.
+  두 옵션은 R2T2/Whisper/Gemini에는 적용하지 않습니다. 힌트로 인식 정확도를 보장하지 않습니다.
   재확인을 켜는 예: {"asr_hints":["사용자가 정한 원어 용어"],"qwen_boundary_recheck":true}
   추가 쓰기 전용 항목: gemini_api_key, save_gemini_key(boolean, 기본 false)
   gemini_api_key 생략=기존 값 유지, 빈 문자열=메모리/저장 키 삭제
@@ -121,10 +122,15 @@ WebSocket 순서
    {"type":"transcript","session_id":"...","segment_id":1,"text":"Hello","is_final":true}
    {"type":"caption","session_id":"...","segment_id":1,"source_text":"Hello",
     "text":"안녕하세요","language":"en","target_language":"ko","is_final":true,"revision":1,"translation_status":"ok"}
-   Gemini의 안정된 완결 문장과 Whisper의 짧은 잠정 구절은 최종 확정 전에
-   is_final:false로 먼저 번역할 수 있습니다.
+   Qwen, Whisper, Confucius4-R2T2, Gemini Live 모두 사용 가능한 중간 원문을 is_final:false로 번역할 수 있습니다.
+   기본 Qwen은 처리 여유가 있을 때 열린 구간의 약 1.4초부터 한 차례 중간 인식을 시도합니다.
+   반복확인 Qwen은 연속 관측에서 일치한 앞부분, AlignAtt는 디코더가 내놓은 구절, R2T2는 안정된 원문을 사용합니다.
+   Gemini는 안정된 완결 문장이나 여러 번 관측되고 실제로 길어진 미완성 구절의 앞부분을 사용합니다.
+   짧은 발화, 혼잡 상태, 모델이 중간 원문을 내놓지 않는 경우에는 확정 이벤트가 먼저 올 수 있습니다.
    최종 전사에 따라 같은 session_id+segment_id의 caption을 교체합니다. 새 행으로 추가하지 마세요.
-   동일 원문의 최종 확정은 기존 번역을 재사용합니다. source_text가 바뀌면 revision이 증가합니다.
+   최종 원문·언어와 번역 모델에 전달되는 앞 문맥이 같으면 성공한 번역을 재사용합니다.
+   동일 ID에 원문 교정이나 문맥 변경으로 다시 번역한 결과가 올 수 있습니다. revision 순서로 갱신합니다.
+   늦게 끝난 번역도 원문의 앞부분이 그대로 유지되고 더 최신 번역이 표시되기 전이면 그 앞부분의 초안으로 보낼 수 있습니다.
    최종 전사에서 철회되거나 합쳐진 잠정 문장은 다음 이벤트로 삭제합니다:
    {"type":"caption_remove","session_id":"...","segment_id":1}
    UI는 해당 ID의 현재/대기/최근 자막을 삭제하고, 지나간 문장 교정으로 오버레이를 되감지 않습니다.
@@ -133,7 +139,7 @@ WebSocket 순서
    Whisper 중간 원문 인식은 preview:true로 표시합니다. 한국어 잠정 번역은 caption의
    is_final:false로 전달하며, 안정된 문장/절과 무음 뒤 남은 말은 is_final:true로 확정합니다.
    원문 transcript를 한국어 오버레이 자막으로 직접 표시하지 마세요.
-   잠정 caption은 첫 음성 1.2초 이후부터 가능하며 원문 최대 96자, 최소 0.8초 간격입니다.
+   Whisper 기본·반복확인의 잠정 caption은 첫 음성 1.2초 이후부터 가능하며 원문 최대 96자, 최소 0.8초 간격입니다.
    Whisper에서 처음 번역할 짧은 미완성 구절은 두 번 동일하게 관측되고, 새 오디오와
    경과 시간이 각각 0.35초 이상 늘어나야 합니다. CJK 포함 시 문자·숫자 수 6자 이하,
    그 밖에는 2단어·24자 이하가 대상입니다. 명시적 문장/절 끝과 최종 확정은 대기하지 않습니다.

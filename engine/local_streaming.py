@@ -49,6 +49,7 @@ class StreamingResult:
     pending_text: str
     warnings: tuple[str, ...] = ()
     reset_prompt: bool = False
+    agreed_pending: str = ""
 
 
 @dataclass(slots=True)
@@ -771,4 +772,10 @@ class LocalWhisperStreaming:
         elif len(window.pcm) >= self.max_buffer_bytes:
             raise EngineError("local_streaming_overrun",
                               "연속 발화의 인식 결과가 안정되지 않아 버퍼 한도에 도달했습니다. 누락을 막기 위해 중지했습니다.", 409)
-        return StreamingResult(tuple(segments), committed_text, pending_text, tuple(dict.fromkeys(warnings)), reset_prompt)
+        # Expose only time-guarded, independently observed words for repeated-
+        # confirmation captions. A recovered hypothesis is not fresh evidence.
+        agreed = (text[word_ends[count - 1] if count else 0:word_ends[stable_count - 1]].strip()
+                  if not snapshot.is_final and not observed_empty and not recovered_prefix_count
+                  and stable_count > count else "")
+        return StreamingResult(tuple(segments), committed_text, pending_text, tuple(dict.fromkeys(warnings)),
+                               reset_prompt, agreed)

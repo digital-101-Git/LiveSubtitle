@@ -4,7 +4,13 @@ using System.Globalization;
 
 namespace LiveSubtitle.App.Services;
 
-public sealed record DisplayCaption(string? Id, string Translation, string Source);
+public sealed record DisplayCaption(string? Id, string Translation, string Source)
+{
+    internal bool IsFinal { get; init; } = true;
+    internal string OverlayTranslation => IsFinal || Translation.EndsWith("…", StringComparison.Ordinal)
+        || Translation.EndsWith("...", StringComparison.Ordinal) ? Translation : Translation + " …";
+    internal long FinalReadUntil { get; init; }
+}
 
 public sealed class CaptionQueueOverflowException : InvalidOperationException
 {
@@ -42,7 +48,7 @@ public sealed class CaptionDisplayQueue
     // occupied, only the row about to leave must finish its reading time.
     // Its original first-appearance clock survives Current -> Previous.
     public long MillisecondsUntilAdvance(long now) => Previous == null ? 0 :
-        Math.Max(0, PreviousDisplayMilliseconds - (now - _previousShownSince));
+        Math.Max(0, Math.Max(_previousShownSince + PreviousDisplayMilliseconds, Previous.FinalReadUntil) - now);
 
     // Count visible text elements rather than UTF-16 units: a combined accent
     // or emoji is one element, and whitespace does not add reading time.
@@ -65,15 +71,18 @@ public sealed class CaptionDisplayQueue
 
     // A non-null return signals a visible change. Read VisibleCaptions for both
     // rows: a correction to Previous returns Current without changing row order.
-    public DisplayCaption? Enqueue(string translation, string source, string? id, long now)
+    public DisplayCaption? Enqueue(string translation, string source, string? id, long now) =>
+        EnqueueRevision(translation, source, id, now, true);
+
+    public DisplayCaption? EnqueueRevision(string translation, string source, string? id, long now, bool isFinal)
     {
         id = string.IsNullOrEmpty(id) ? null : id;
-        var caption = new DisplayCaption(id, translation, source);
+        var caption = new DisplayCaption(id, translation, source) { IsFinal = isFinal };
         if (id != null)
         {
-            // A revision replaces the text without restarting its reading clock.
-            if (Current?.Id == id) return Current = caption;
-            if (Previous?.Id == id) { Previous = caption; return Current; }
+            // Preserve row order and the original clock through incremental drafts.
+            if (Current?.Id == id) return Current = ReviseVisible(Current, caption, now);
+            if (Previous?.Id == id) { Previous = ReviseVisible(Previous, caption, now); return Current; }
             if (_pendingById.TryGetValue(id, out var node)) { node.Value = caption; return null; }
             if (_seenIds.Contains(id)) return null;
         }
@@ -89,6 +98,14 @@ public sealed class CaptionDisplayQueue
         var added = _pending.AddLast(caption);
         if (id != null) { _pendingById.Add(id, added); _seenIds.Add(id); }
         return visible;
+    }
+
+    private static DisplayCaption ReviseVisible(DisplayCaption previous, DisplayCaption next, long now)
+    {
+        // Only a changed translation at the draft-to-final transition earns
+        // this short reading interval. Subsequent updates cannot extend it.
+        bool changedFinal = !previous.IsFinal && next.IsFinal && previous.Translation != next.Translation;
+        return next with { FinalReadUntil = changedFinal ? now + MinimumDisplayMilliseconds : previous.FinalReadUntil };
     }
 
     public DisplayCaption? Advance(long now)

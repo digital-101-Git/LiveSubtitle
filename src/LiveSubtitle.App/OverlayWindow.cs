@@ -112,7 +112,10 @@ public sealed class OverlayWindow : Window
         if (finishedEditing) CommitPlacement();
     }
 
-    public void SetCaption(string translation, string source, string? captionId = null)
+    public void SetCaption(string translation, string source, string? captionId = null) =>
+        SetCaptionRevision(translation, source, captionId, true);
+
+    public void SetCaptionRevision(string translation, string source, string? captionId, bool isFinal)
     {
         // After a quiet interval, a fresh utterance starts with one row. An
         // authoritative correction of either still-known row keeps its place.
@@ -122,7 +125,7 @@ public sealed class OverlayWindow : Window
             _captions.ClearVisibleHistory();
             ClearCaptionText();
         }
-        DisplayCaption? visible = _captions.Enqueue(translation, source, captionId, Environment.TickCount64);
+        DisplayCaption? visible = _captions.EnqueueRevision(translation, source, captionId, Environment.TickCount64, isFinal);
         if (visible != null) PresentCaptions();
         SynchronizeCaptionQueue();
         Timer_Tick(null, EventArgs.Empty);
@@ -141,7 +144,7 @@ public sealed class OverlayWindow : Window
 
     private void PresentCaptions()
     {
-        _lastTranslation = string.Join("\n", _captions.VisibleCaptions.Select(item => SingleLine(item.Translation)));
+        _lastTranslation = string.Join("\n", _captions.VisibleCaptions.Select(item => SingleLine(item.OverlayTranslation)));
         _lastSource = string.Join("\n", _captions.VisibleCaptions.Select(item => SingleLine(item.Source)));
         _lastCaption = DateTime.UtcNow; UpdateText();
         if (_settings.ShowOverlay || _editing)
@@ -232,8 +235,8 @@ public sealed class OverlayWindow : Window
     private void UpdateText()
     {
         bool preview = _editing && (DateTime.UtcNow - _lastCaption).TotalSeconds > 8;
-        _previousTranslation.Text = preview ? "" : SingleLine(_captions.Previous?.Translation ?? "");
-        _translation.Text = preview ? UiText.T("실시간 번역 자막이 여기에 표시됩니다.") : SingleLine(_captions.Current?.Translation ?? "");
+        _previousTranslation.Text = preview ? "" : SingleLine(_captions.Previous?.OverlayTranslation ?? "");
+        _translation.Text = preview ? UiText.T("실시간 번역 자막이 여기에 표시됩니다.") : SingleLine(_captions.Current?.OverlayTranslation ?? "");
         _previousTranslation.Visibility = !preview && _captions.Previous != null ? Visibility.Visible : Visibility.Collapsed;
         _translation.Visibility = preview || _captions.Current != null ? Visibility.Visible : Visibility.Collapsed;
         _source.Text = preview ? UiText.T("Live captions appear here.") : _lastSource;

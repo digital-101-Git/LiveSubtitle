@@ -11,6 +11,8 @@ from .settings import EngineError, validate_gguf
 ASR_FILES = ("model.bin", "config.json", "preprocessor_config.json", "tokenizer.json", "vocabulary.json")
 QWEN_ASR_FILES = ("config.json", "processor_config.json", "chat_template.jinja",
                   "tokenizer.json", "tokenizer_config.json", "generation_config.json")
+R2T2_ASR_FILES = ("preprocessor_config.json", "chat_template.json", "tokenizer.json",
+                  "tokenizer_config.json", "generation_config.json")
 
 
 def _model_file(directory: Path, name: str) -> Path:
@@ -78,7 +80,13 @@ def asr_backend(path: Path) -> str:
         if config.get("model_type") == "qwen3_asr":
             if "Qwen3ASRForConditionalGeneration" not in config.get("architectures", []):
                 raise ValueError("unsupported Qwen ASR architecture")
-            for name in QWEN_ASR_FILES:
+            # R2T2 and Qwen declare the same architecture. The original Youdao
+            # checkpoint uses the nested thinker layout and its own processor files.
+            backend, support_files = "qwen3_asr", QWEN_ASR_FILES
+            if isinstance(config.get("thinker_config"), dict) and (path / "UPSTREAM.json").is_file():
+                if _read_metadata(path, "UPSTREAM.json").get("model") == "netease-youdao/Confucius4-R2T2":
+                    backend, support_files = "r2t2", R2T2_ASR_FILES
+            for name in support_files:
                 _model_file(path, name)
             index_path = path / "model.safetensors.index.json"
             if index_path.exists():
@@ -94,7 +102,7 @@ def asr_backend(path: Path) -> str:
                     raise ValueError("indexed tensor missing")
             else:
                 _safetensors_complete(_model_file(path, "model.safetensors"))
-            return "qwen3_asr"
+            return backend
         if config.get("model_type") not in (None, "whisper"):
             raise ValueError("unsupported model type")
         for name in ASR_FILES:
@@ -124,7 +132,10 @@ def inventory(root: Path) -> dict:
                     backend = asr_backend(path)
                 except EngineError:
                     continue
-                result[kind].append({"name": path.name, "path": path.relative_to(root).as_posix(),
+                name = path.name
+                if backend == "r2t2" and name.casefold() == "confucius4-r2t2":
+                    name = "NetEase Confucius4-R2T2"
+                result[kind].append({"name": name, "path": path.relative_to(root).as_posix(),
                                      "backend": backend})
     return result
 

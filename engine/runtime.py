@@ -1,4 +1,4 @@
-"""Owned llama.cpp process and lazily imported local Whisper / Qwen3-ASR."""
+"""Owned llama.cpp process and lazily imported local speech recognizers."""
 from __future__ import annotations
 
 import asyncio
@@ -125,6 +125,8 @@ class Runtime:
                     asr_path = confined_model(self.root, settings["asr_model"], "asr")
                     # Validate both replacements before disturbing loaded models.
                     selected_backend = await asyncio.to_thread(asr_backend, asr_path)
+                    if selected_backend == "r2t2" and profile != "legacy":
+                        raise EngineError("asr_profile_unsupported", "Confucius4-R2T2는 기본 방식에서 스트리밍으로 인식합니다.", 400)
                     if profile == "alignatt":
                         if selected_backend != "whisper":
                             raise EngineError("asr_profile_unsupported", "AlignAtt 방식은 Whisper 모델에서만 사용할 수 있습니다.", 400)
@@ -239,11 +241,14 @@ class Runtime:
             if self.asr is not None and self.asr_path == path:
                 return
             backend = asr_backend(path)
-            if backend == "qwen3_asr":
-                from .asr_qwen import QwenASR
+            if backend in {"qwen3_asr", "r2t2"}:
+                if backend == "r2t2":
+                    from .asr_r2t2 import R2T2ASR as adapter
+                else:
+                    from .asr_qwen import QwenASR as adapter
                 self._discard_asr()
                 self._torch_asr_used = True
-                self.asr = QwenASR(path)
+                self.asr = adapter(path)
                 self.asr_path, self.asr_backend = path, backend
                 return
             try:
@@ -273,7 +278,7 @@ class Runtime:
                     if adapter is None:
                         raise RuntimeError("AlignAtt adapter is not loaded")
                     warmup_alignatt(adapter)
-                elif self.asr_backend == "qwen3_asr":
+                elif self.asr_backend in {"qwen3_asr", "r2t2"}:
                     self.asr.warmup()
                 else:
                     warmup_whisper(self.asr)
@@ -293,6 +298,8 @@ class Runtime:
             import numpy as np
             samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768.0
             try:
+                if self.asr_backend == "r2t2":
+                    return self.asr.transcribe(samples, language)
                 if self.asr_backend == "qwen3_asr":
                     if self.asr_hint_prompt:
                         return self.asr.transcribe(samples, language, prompt=self.asr_hint_prompt)
@@ -350,6 +357,28 @@ class Runtime:
         from .speech_gate import OnlineSpeechGate
         return OnlineSpeechGate()
 
+    def create_r2t2_stream(self, language: str = "auto"):
+        language = normalize_language(language)
+        with self.asr_lock:
+            if self.asr is None or self.asr_backend != "r2t2":
+                raise EngineError("asr_not_ready", "Confucius4-R2T2 모델을 먼저 준비해 주세요.", 409)
+            return self.asr.create_stream(language)
+
+    def r2t2_step(self, stream, pcm: bytes, final: bool = False) -> tuple[str, str]:
+        with self.asr_lock:
+            if self.asr is None or self.asr_backend != "r2t2":
+                raise EngineError("asr_not_ready", "Confucius4-R2T2 모델을 먼저 준비해 주세요.", 409)
+            try:
+                return self.asr.step(stream, pcm, final=final)
+            except EngineError:
+                raise
+            except Exception as exc:
+                raise EngineError("asr_failed", "Confucius4-R2T2 음성 인식에 실패했습니다.", 503) from exc
+
+    def close_r2t2_stream(self, stream) -> None:
+        with self.asr_lock:
+            stream.close()
+
     def create_alignatt_stream(self, language: str = "auto"):
         language = normalize_language(language)
         with self.asr_lock:
@@ -381,7 +410,7 @@ class Runtime:
         with self.asr_lock:
             if self.asr is None:
                 raise EngineError("asr_not_ready", "음성 인식 모델을 준비해 주세요.", 409)
-            if self.asr_backend == "qwen3_asr":
+            if self.asr_backend in {"qwen3_asr", "r2t2"}:
                 raise EngineError("asr_streaming_unsupported", "이 스트리밍 방식은 Whisper 모델용입니다.", 409)
             import numpy as np
             samples = np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768.0
@@ -730,11 +759,11 @@ class Runtime:
         self.asr_warmup_ms = None
         previous, backend = self.asr, self.asr_backend
         self.asr, self.asr_path, self.asr_backend = None, None, None
-        if previous is not None and backend == "qwen3_asr":
+        if previous is not None and backend in {"qwen3_asr", "r2t2"}:
             previous.close()
         del previous
         gc.collect()
-        if self._torch_asr_used and backend != "qwen3_asr":
+        if self._torch_asr_used and backend not in {"qwen3_asr", "r2t2"}:
             # A failed Qwen load leaves no adapter, but traceback-held tensors can
             # have been released into the allocator cache since that failure.
             from .asr_qwen import clear_cuda_cache

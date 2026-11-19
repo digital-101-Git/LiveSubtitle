@@ -28,6 +28,38 @@ class _Candidate:
 class _Published:
     segment_id: int
     text: str
+    retry: bool = False
+
+
+@dataclass(slots=True)
+class _GrowingTail:
+    anchor: str
+    latest: str
+    since: float
+
+
+def extends_draft(older: str, newer: str) -> bool:
+    """Only unchanged text ending on a word or Han/kana character boundary."""
+    if not older or len(older) >= len(newer) or not newer.startswith(older):
+        return False
+    next_char = newer[len(older)]
+    if next_char.isspace():
+        return older[-1] not in "'’_-‐‑"
+    if older[-1] in "'’_-‐‑" or next_char in "'’_-‐‑" or unicodedata.category(next_char).startswith("M"):
+        return False
+    preceding = next((ch for ch in reversed(older) if not unicodedata.category(ch).startswith("M")), "")
+    if not preceding:
+        return False
+    # A decimal or thousands separator can change the preceding number.
+    if older[-1].isdigit() and (next_char.isalnum()
+                                or next_char in ".,，．" and newer[len(older) + 1:len(older) + 2].isdigit()):
+        return False
+    if next_char.isdigit() and older[-1] in ".,，．" and older[-2:-1].isdigit():
+        return False
+    if not next_char.isalnum() or not preceding.isalnum():
+        return True
+    return any("\u3040" <= ch <= "\u30ff" or "\u3400" <= ch <= "\u9fff"
+               for ch in (preceding, next_char))
 
 
 class StreamingSentences:
@@ -45,6 +77,7 @@ class StreamingSentences:
         self.nextid = 1
         self._candidates: list[_Candidate] = []
         self._published: dict[int, _Published] = {}
+        self._tail: _GrowingTail | None = None
 
     @staticmethod
     def _validate(text: str) -> None:
@@ -59,14 +92,31 @@ class StreamingSentences:
             self._published[index] = published
         else:
             published.text = text
+            published.retry = False
         return published
+
+    def draft_observations(self, text: str):
+        """Pair this turn's live IDs with the provider's latest source at each position."""
+        if self._published:
+            self._validate(text)
+            parts = split_sentences(text)
+            for index, published in self._published.items():
+                yield published.segment_id, parts[index] if index < len(parts) else ""
+
+    def retry_draft(self, segment_id: int):
+        """A withdrawn MT job may be reoffered if its source stabilizes again."""
+        for published in self._published.values():
+            if published.segment_id == segment_id:
+                published.retry = True
+                break
 
     def observe(self, text: str, now: float) -> list[SentenceUpdate]:
         """Replace the interim hypothesis and publish sufficiently stable parts."""
         self._validate(text)
         parts = split_sentences(text)
+        tail = ""
         if parts and completed_sentence_prefix(parts[-1]) != parts[-1]:
-            parts.pop()
+            tail = parts.pop()
         candidates: list[_Candidate] = []
         prefix_unchanged = True
         for index, sentence in enumerate(parts):
@@ -79,8 +129,38 @@ class StreamingSentences:
             else:
                 candidate = _Candidate(sentence, now, 1)
             candidates.append(candidate)
+        same_context = prefix_unchanged and len(candidates) == len(self._candidates)
         self._candidates = candidates
-        return self.flush_due(now)
+        updates = self.flush_due(now)
+        # Only new provider evidence can release an unpunctuated draft. Advancing
+        # the timer or repeating an otherwise unchanged fragment is insufficient.
+        stable = self._observe_tail(tail, now, same_context)
+        if stable:
+            index = len(candidates)
+            previous = self._published.get(index)
+            if previous is None or previous.text != stable or previous.retry:
+                published = self._allocate(index, stable)
+                updates.append(SentenceUpdate(published.segment_id, stable, False))
+        return updates
+
+    def _observe_tail(self, text: str, now: float, same_context: bool) -> str:
+        previous = self._tail
+        if not text:
+            self._tail = None
+            return ""
+        if not same_context or previous is None or not text.startswith(previous.latest):
+            self._tail = _GrowingTail(text, text, now)
+            return ""
+        if text == previous.latest:
+            return ""
+        previous.latest = text
+        if not extends_draft(previous.anchor, text) or not any(c.isalnum() for c in previous.anchor):
+            self._tail = _GrowingTail(text, text, now)
+            return ""
+        if now - previous.since < self.stability_seconds:
+            return ""
+        self._tail = _GrowingTail(text, text, now)
+        return previous.anchor
 
     def flush_due(self, now: float) -> list[SentenceUpdate]:
         """Check time only; timer ticks never count as additional observations."""
@@ -90,7 +170,7 @@ class StreamingSentences:
                     or now - candidate.since < self.stability_seconds):
                 continue
             previous = self._published.get(index)
-            if previous is not None and previous.text == candidate.text:
+            if previous is not None and previous.text == candidate.text and not previous.retry:
                 continue
             published = self._allocate(index, candidate.text)
             updates.append(SentenceUpdate(published.segment_id, candidate.text, False))
@@ -129,6 +209,7 @@ class StreamingSentences:
                 updates.append(SentenceUpdate(segment_id, source, True, removed=True))
         self._candidates = []
         self._published = {}
+        self._tail = None
         return updates
 
 

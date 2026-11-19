@@ -25,6 +25,10 @@
 !/models/translation/
 /models/asr/*
 !/models/asr/qwen3-asr-1.7b/
+!/models/asr/confucius4-r2t2/
+/models/asr/confucius4-r2t2/*
+!/models/asr/confucius4-r2t2/UPSTREAM.json
+!/models/asr/confucius4-r2t2/MODEL_LICENSE
 !/models/asr/whisper-large-v3-turbo/
 /models/asr/qwen3-asr-1.7b/*
 !/models/asr/qwen3-asr-1.7b/config.json

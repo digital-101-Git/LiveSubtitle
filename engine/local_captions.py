@@ -85,15 +85,21 @@ class LocalCaptions:
                                           self._preview.text, True, removed=True))
             self._preview = None
 
-    def defer_preview(self, segment_id: int, text: str) -> None:
+    @property
+    def preview_id(self) -> int | None:
+        return self._preview.segment_id if self._preview is not None else None
+
+    def defer_preview(self, segment_id: int, text: str | None = None) -> None:
         """Retry an offered preview that the translation queue could not take.
 
         A delayed rejection must not revive a removed/finalized preview or
         overwrite a newer hypothesis. Reoffers keep the ordinary audio and
         wall-clock throttle; an accepted offer needs no acknowledgement.
         """
+        # A synchronous raw correction can invalidate the active draft before
+        # the next MT offer. A delayed queue rejection supplies its exact text.
         if (self._preview is not None and self._preview.segment_id == segment_id
-                and self._preview.text == text):
+                and (text is None or self._preview.text == text)):
             self._preview.retry = True
 
     def _preview_text(self, pending: str) -> str:
@@ -128,8 +134,8 @@ class LocalCaptions:
                 end = space
         return text[:end].rstrip()
 
-    def accept(self, snapshot: ASRSnapshot, result: StreamingResult,
-               now: float | None = None) -> list[SentenceUpdate]:
+    def accept(self, snapshot: ASRSnapshot, result: StreamingResult, now: float | None = None,
+               *, agreed_pending: str | None = None) -> list[SentenceUpdate]:
         """Return revisions, ordered final captions, and preview removals.
 
         Final captions bypass preview timing/length limits. Only a preview can
@@ -175,14 +181,17 @@ class LocalCaptions:
             self._closed = True
             return updates
 
-        text = self._preview_text(result.pending_text)
+        text = self._preview_text(result.pending_text if agreed_pending is None else agreed_pending)
         if not text:
-            self._remove_preview(updates)
+            # The repeated-confirmation decoder can see a changed raw tail
+            # before any part of it agrees. Keep the row for its next revision.
+            if agreed_pending is None or not result.pending_text:
+                self._remove_preview(updates)
             self._clear_candidate()
             return updates
         needs_initial_guard = (self._preview is None or
                                (self._preview.retry and not self._preview.accepted))
-        if needs_initial_guard and not self._new_preview_ready(text, audio_end, clock):
+        if needs_initial_guard and agreed_pending is None and not self._new_preview_ready(text, audio_end, clock):
             return updates
         if self._preview is not None and self._preview.text == text and not self._preview.retry:
             return updates

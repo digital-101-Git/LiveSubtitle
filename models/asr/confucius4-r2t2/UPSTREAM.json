@@ -1,0 +1,86 @@
+{
+  "model": "netease-youdao/Confucius4-R2T2",
+  "revision": "d07b4a593610c16074cfc941fba052a7a12eeda3",
+  "license": "NetEase Youdao Model Use License Agreement",
+  "verified_on": "2026-11-19",
+  "files": [
+    {
+      "path": "MODEL_LICENSE",
+      "url": "https://raw.githubusercontent.com/netease-youdao/Confucius4-R2T2/62757213befa282e7fbfe1bfde3c29577781527c/MODEL_LICENSE",
+      "sha256": "4d9321cdad58182faa878b015de7d60069881614ddd7571de70f751a9b8e3811",
+      "bytes": 11071
+    },
+    {
+      "path": "generation_config.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/generation_config.json",
+      "sha256": "1da527824d81e07118facff437e03f2e24a23311e3bdeb2368973fe77e5f275c",
+      "bytes": 142
+    },
+    {
+      "path": "preprocessor_config.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/preprocessor_config.json",
+      "sha256": "45e120a4eda2c20c5d7f2ea9354e63536bf35e27aa573fb7cdf78017b378770d",
+      "bytes": 330
+    },
+    {
+      "path": "special_tokens_map.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/special_tokens_map.json",
+      "sha256": "7b376c510ccf9d88bb9bbee41dfc5052122e16e0dec1124a8d8983c59259a9f3",
+      "bytes": 1008
+    },
+    {
+      "path": "chat_template.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/chat_template.json",
+      "sha256": "75a8cfca24f00de72d796fbfed6858fc9614ef3dabd8696684cc3bc03a9c58ff",
+      "bytes": 1161
+    },
+    {
+      "path": "added_tokens.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/added_tokens.json",
+      "sha256": "de40784677cbd1843cabe5fbee078c7e042cd0b62155f0810af5a13842e5722a",
+      "bytes": 1566
+    },
+    {
+      "path": "config.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/config.json",
+      "sha256": "829b3b9cea085a46459353609774b08e4898924253ae6d623c2b4cd855386b23",
+      "bytes": 6195
+    },
+    {
+      "path": "tokenizer_config.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/tokenizer_config.json",
+      "sha256": "4942d005604266809309cabc9f4e9cb89ce855d59b14681fdc0e1cc62ea26c4c",
+      "bytes": 12487
+    },
+    {
+      "path": "README.md",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/README.md",
+      "sha256": "cdb825e549adf874fa51ffe80fce4863474d17de6cb47abfdfc1f7c0df3aca0a",
+      "bytes": 31186
+    },
+    {
+      "path": "merges.txt",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/merges.txt",
+      "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+      "bytes": 1671853
+    },
+    {
+      "path": "vocab.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/vocab.json",
+      "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+      "bytes": 2776833
+    },
+    {
+      "path": "tokenizer.json",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/tokenizer.json",
+      "sha256": "0499602714160467f2d68b910651d6216020689f1e016be87a2d0019ee3baeab",
+      "bytes": 11429499
+    },
+    {
+      "path": "model.safetensors",
+      "url": "https://huggingface.co/netease-youdao/Confucius4-R2T2/resolve/d07b4a593610c16074cfc941fba052a7a12eeda3/model.safetensors",
+      "sha256": "cc4d5324d386c80f98a8a7b09fbcdcc813ad08a6503fe3a586ebb144ec4610dc",
+      "bytes": 4076191640
+    }
+  ]
+}
